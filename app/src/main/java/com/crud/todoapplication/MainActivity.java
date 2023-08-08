@@ -5,12 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -18,20 +18,34 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import android.widget.ArrayAdapter;
 
+/**
+ * <p>
+ * Representing the main activity of the Todo application
+ * </p>
+ *
+ * @author vasanth
+ * @version 1.0
+ */
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private ImageButton backMenu;
-    //    private TableLayout tableLayout;
-//    private TextView editText;
     private ListView nameListView;
     private ArrayAdapter<String> arrayAdapter;
     private List<String> nameLists;
     private ImageButton menuButton;
+    private String selectedList;
 
-    @SuppressLint("MissingInflatedId")
+    /**
+     * <p>
+     * Creation of the main activity
+     * </p>
+     *
+     * @param savedInstanceState Refers the saved instance of the state
+     */
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,8 +53,6 @@ public class MainActivity extends AppCompatActivity {
 
         drawerLayout = findViewById(R.id.drawerLayout);
         menuButton = findViewById(R.id.menuButton);
-//        tableLayout = findViewById(R.id.tableLayout);
-//        editText = findViewById(R.id.addList);
         nameListView = findViewById(R.id.nameListView);
         nameLists = new ArrayList<>();
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, nameLists);
@@ -65,22 +77,28 @@ public class MainActivity extends AppCompatActivity {
         addList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-//                Intent intent = new Intent(MainActivity.this, MainActivity2.class);
-//                startActivity(intent);
                 AddNameDialog();
             }
         });
 
-//        ListView listView = findViewById(R.id.nameListView);
-//        listView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(MainActivity.this, MainActivity2.class);
-//                startActivity(intent);
-//            }
-//        });
+        final ListView listView = findViewById(R.id.nameListView);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(final AdapterView<?> adapterView, final View view, final int indexPosition, final long l) {
+                final Intent intent = new Intent(MainActivity.this, MainActivity2.class);
+                selectedList = nameLists.get(indexPosition);
+                intent.putExtra("List Reference", selectedList);
+                startActivity(intent);
+
+            }
+        });
     }
 
+    /**
+     * <p>
+     * Displays a dialog box for adding a new list name
+     * </p>
+     */
     private void AddNameDialog() {
         final EditText editText = new EditText(this);
         editText.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -90,55 +108,17 @@ public class MainActivity extends AppCompatActivity {
                 .setView(editText)
                 .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(final DialogInterface dialog, final int which) {
                         final String name = editText.getText().toString();
 
                         if (!name.isEmpty()) {
                             nameLists.add(name);
                             arrayAdapter.notifyDataSetChanged();
                         }
-//                        addNewTodoItem();
                     }
                 })
                 .setNegativeButton("Cancel", null)
                 .create()
                 .show();
     }
-
-//    public void addNewTodoItem() {
-//        final String todoItem = editText.getText().toString();
-//
-//        if (!todoItem.isEmpty()) {
-//            final TableRow tableRow = new TableRow(MainActivity.this);
-//
-//            tableRow.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
-//                    TableLayout.LayoutParams.WRAP_CONTENT));
-//
-//            final CheckBox checkBox = new CheckBox(MainActivity.this);
-//            tableRow.addView(checkBox);
-//
-//            final TextView todoView = new TextView(MainActivity.this);
-//            todoView.setText(todoItem);
-//            tableRow.addView(todoView);
-//
-//            final ImageView closeIcon = new ImageView(MainActivity.this);
-//            closeIcon.setImageResource(R.drawable.close);
-//            closeIcon.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    removeItem(tableRow);
-//                }
-//            });
-//
-//            tableRow.addView(closeIcon);
-//
-//            tableLayout.addView(tableRow);
-//            checkBox.setOnCheckedChangeListener((v, isClick) -> {
-//
-//            });
-//        }
-//    }
-//    private void removeItem ( final TableRow tableRow){
-//        tableLayout.removeView(tableRow);
-//    }
 }
