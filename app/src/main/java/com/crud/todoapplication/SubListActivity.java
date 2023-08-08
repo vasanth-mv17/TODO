@@ -20,6 +20,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.crud.todoapplication.model.Project;
+import com.crud.todoapplication.model.TodoList;
+
 /**
  * <p>
  * Representing the main activity2 of the Todo application
@@ -28,17 +31,18 @@ import androidx.drawerlayout.widget.DrawerLayout;
  * @author vasanth
  * @version 1.0
  */
-public class MainActivity2 extends AppCompatActivity {
+public class SubListActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private ImageButton menuButton;
     private TableLayout tableLayout;
     private EditText editText;
     private String selectedList;
+    private TodoList todoList;
 
     /**
      * <p>
-     * Creation of the main activity 2
+     * Creation of the sub list activity
      * </p>
      *
      * @param savedInstanceState Refers the saved instance of the state
@@ -47,11 +51,14 @@ public class MainActivity2 extends AppCompatActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
+        setContentView(R.layout.activity_sub_list);
 
         drawerLayout = findViewById(R.id.drawerLayout);
         menuButton = findViewById(R.id.menuButton);
+        tableLayout = findViewById(R.id.tableLayout);
+        editText = findViewById(R.id.todoEditText);
         selectedList = getIntent().getStringExtra("List Reference");
+        todoList = new TodoList(selectedList);
 
         if (null != selectedList) {
             TextView textView = findViewById(R.id.listName);
@@ -64,8 +71,6 @@ public class MainActivity2 extends AppCompatActivity {
             }
         });
 
-        tableLayout = findViewById(R.id.tableLayout);
-        editText = findViewById(R.id.todoEditText);
         final Button addButton = findViewById(R.id.button);
 
         addButton.setOnClickListener(new View.OnClickListener() {
@@ -84,100 +89,107 @@ public class MainActivity2 extends AppCompatActivity {
      * </p>
      */
     public void addNewTodoItem() {
-        final String todoItem = editText.getText().toString();
-        final TableRow tableRow = new TableRow(MainActivity2.this);
-        final CheckBox checkBox = new CheckBox(MainActivity2.this);
-        final TextView todoView = new TextView(MainActivity2.this);
-        final ImageView closeIcon = new ImageView(MainActivity2.this);
-
-        tableRow.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
-                TableLayout.LayoutParams.WRAP_CONTENT));
-        tableRow.addView(checkBox);
-        todoView.setText(todoItem);
-        tableRow.addView(todoView);
-        closeIcon.setImageResource(R.drawable.baseline_close_24);
-        closeIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                removeItem(tableRow);
-            }
-        });
-
-        tableRow.addView(closeIcon);
-        tableLayout.addView(tableRow);
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
-                if (isChecked) {
-                    todoView.setTextColor(ContextCompat.getColor(MainActivity2.this, android.R.color.darker_gray));
-                } else {
-                    todoView.setTextColor(Color.BLACK);
-                }
-            }
-        });
-        editText.getText().clear();
-        saveTodoList(selectedList);
+        String todoItem = editText.getText().toString();
+        if (!todoItem.isEmpty()) {
+            Project project = new Project(todoItem);
+            todoList.add(project);
+            updateTableLayout();
+            saveTodoList();
+            editText.getText().clear();
+        }
     }
 
     /**
      * <p>
-     * Load saved items associated with a specific list name from shared preferences
+     * Update the tableLayout with todo items, checkboxes and close icons
+     * </p>
+     */
+    private void updateTableLayout() {
+        tableLayout.removeAllViews();
+
+        for (final Project project : todoList.getAll()) {
+            final TableRow tableRow = new TableRow(SubListActivity.this);
+            final CheckBox checkBox = new CheckBox(SubListActivity.this);
+            final TextView todoView = new TextView(SubListActivity.this);
+            final ImageView closeIcon = new ImageView(SubListActivity.this);
+
+            tableRow.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
+                    TableLayout.LayoutParams.WRAP_CONTENT));
+            tableRow.addView(checkBox);
+            todoView.setText(project.getLabel());
+            tableRow.addView(todoView);
+            closeIcon.setImageResource(R.drawable.baseline_close_24);
+            closeIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    removeItem(project);
+                }
+            });
+
+            tableRow.addView(closeIcon);
+            tableLayout.addView(tableRow);
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
+                    if (isChecked) {
+                    todoView.setTextColor(ContextCompat.getColor(SubListActivity.this, android.R.color.darker_gray));
+                } else {
+                    todoView.setTextColor(Color.BLACK);
+                }
+                }
+            });
+        }
+    }
+
+    /**
+     * <p>
+     * Load saved items with a specific list name from shared preferences
      * </p>
      *
      * @param listName Refers name of the todo list from which to load items
      */
-    private void loadTodoList(String listName) {
+    private void loadTodoList(final String listName) {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         final String savedTodoItems = sharedPreferences.getString(listName, "");
         final String[] todoItems = savedTodoItems.split(",");
 
         for (final String todoItem : todoItems) {
             if (!todoItem.isEmpty()) {
-                editText.setText(todoItem);
-                addNewTodoItem();
+                final Project project = new Project(todoItem);
+                todoList.add(project);
             }
         }
+        updateTableLayout();
     }
 
     /**
      * <p>
      * Saved the list of Items on shared preferences
      * </p>
-     *
-     * @param listName Refers name of the todo list to associate with the saved items
      */
-    private void saveTodoList(final String listName) {
+    private void saveTodoList() {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         final StringBuilder todoItems = new StringBuilder();
 
-        for (int i = 0; i < tableLayout.getChildCount(); i++) {
-            final TableRow row = (TableRow) tableLayout.getChildAt(i);
-            final TextView todoView = (TextView) row.getChildAt(1);
-            final String Item = todoView.getText().toString();
-            todoItems.append(Item).append(",");
+        for (final Project project : todoList.getAll()) {
+            todoItems.append(project.getLabel()).append(",");
         }
 
-        editor.putString(listName, todoItems.toString());
-        editor.apply();
-    }
-
-    private void deleteList(String listName) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.remove(listName);
+        editor.putString(selectedList, todoItems.toString());
         editor.apply();
     }
 
     /**
      * <p>
-     * Remove the items on the table layout
+     * Remove a Todo item from the list, update the TableLayout, and save the updated list
      * </p>
      *
-     * @param tableRow Refers the table row for the deletion
+     * @param project The Todo item to be removed
      */
-    private void removeItem(final TableRow tableRow) {
-        tableLayout.removeView(tableRow);
-        deleteList(selectedList);
+    private void removeItem(final Project project) {
+        todoList.remove(project.getId());
+        updateTableLayout();
+        saveTodoList();
     }
 }
