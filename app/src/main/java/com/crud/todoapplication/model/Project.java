@@ -6,6 +6,7 @@ public class Project {
 
     private String id;
     private String label;
+    private boolean isChecked;
 
     public Project() {
     }
@@ -14,6 +15,7 @@ public class Project {
         this.label = label;
         this.id = UUID.randomUUID().toString();
     }
+
     public String getId() {
         return id;
     }
@@ -28,6 +30,14 @@ public class Project {
 
     public void setLabel(final String label) {
         this.label = label;
+    }
+
+    public boolean isChecked() {
+        return isChecked;
+    }
+
+    public void setChecked() {
+        this.isChecked = !this.isChecked;
     }
 
     public String toString() {
