@@ -33,6 +33,7 @@ import com.crud.todoapplication.model.TodoList;
  */
 public class SubListActivity extends AppCompatActivity {
 
+    private static  final String NAME = "TodoListPREF";
     private DrawerLayout drawerLayout;
     private ImageButton menuButton;
     private TableLayout tableLayout;
@@ -115,6 +116,7 @@ public class SubListActivity extends AppCompatActivity {
 
             tableRow.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
                     TableLayout.LayoutParams.WRAP_CONTENT));
+
             tableRow.addView(checkBox);
             todoView.setText(project.getLabel());
             tableRow.addView(todoView);
@@ -128,18 +130,35 @@ public class SubListActivity extends AppCompatActivity {
 
             tableRow.addView(closeIcon);
             tableLayout.addView(tableRow);
+            checkBox.setChecked(getCheckedBoxBehaviour(project.getLabel()));
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
-                    if (isChecked) {
+
+                    if(isChecked) {
                     todoView.setTextColor(ContextCompat.getColor(SubListActivity.this, android.R.color.darker_gray));
-                } else {
+                    } else {
                     todoView.setTextColor(Color.BLACK);
-                }
+                    }
+                    saveCheckBoxState(project.getLabel(), isChecked);
                 }
             });
         }
     }
+
+    private boolean getCheckedBoxBehaviour(String label) {
+        final SharedPreferences sharedPreferences = getSharedPreferences(NAME, MODE_PRIVATE);
+        return sharedPreferences.getBoolean(label, false);
+    }
+
+    private void saveCheckBoxState(String label, boolean isChecked) {
+        final SharedPreferences sharedPreferences = getSharedPreferences(NAME, MODE_PRIVATE);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putBoolean(label, isChecked);
+        editor.apply();
+    }
+
 
     /**
      * <p>
@@ -164,7 +183,7 @@ public class SubListActivity extends AppCompatActivity {
 
     /**
      * <p>
-     * Saved the list of Items on shared preferences
+     * Saved the list of items on shared preferences
      * </p>
      */
     private void saveTodoList() {

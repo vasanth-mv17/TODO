@@ -94,9 +94,35 @@ public class MenuListActivity extends AppCompatActivity {
                 selectedList = todoList.get(indexPosition);
                 intent.putExtra("List Reference", selectedList);
                 startActivity(intent);
+
+
+            }
+        });
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MenuListActivity.this);
+                builder.setTitle("Delete List Item");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        todoList.remove(i);
+                        ((ArrayAdapter) listView.getAdapter()).notifyDataSetChanged();
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                return true;
             }
         });
     }
+
+
 
     /**
      * <p>
