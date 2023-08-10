@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">Todo Application</string>
+    <!-- ... Your other resources ... -->
+
+    <string-array name="filter_options">
+        <item>All</item>
+        <item>Completed</item>
+        <item>Not Completed</item>
+    </string-array>
 </resources>

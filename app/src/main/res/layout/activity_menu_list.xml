@@ -99,20 +99,6 @@
             android:dividerHeight="1dp">
 
         </ListView>
-        <!--        <ScrollView-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="0dp"-->
-        <!--            android:layout_weight="1"-->
-        <!--            android:layout_marginTop="16dp">-->
-
-        <!--            <TableLayout-->
-        <!--                android:id="@+id/tableLayout"-->
-        <!--                android:layout_width="match_parent"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:stretchColumns="*">-->
-        <!--            </TableLayout>-->
-
-        <!--        </ScrollView>-->
 
     </LinearLayout>
 

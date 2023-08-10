@@ -27,15 +27,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.crud.todoapplication.model.Project;
 import com.crud.todoapplication.model.TodoList;
 
-/**
- * <p>
- * Representing the sub list activity of the Todo application
- * </p>
- *
- * @author vasanth
- * @version 1.0
- */
-public class SubListActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity {
 
     private static  final String NAME = "TodoListPREF";
     private DrawerLayout drawerLayout;
@@ -58,7 +50,7 @@ public class SubListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sub_list);
+        setContentView(R.layout.activity_search);
 
         drawerLayout = findViewById(R.id.drawerLayout);
         menuButton = findViewById(R.id.menuButton);
@@ -98,10 +90,11 @@ public class SubListActivity extends AppCompatActivity {
                 addNewTodoItem();
             }
         });
-        filterSpinner = findViewById(R.id.filterSpinner);
 
+        filterSpinner = findViewById(R.id.filterSpinner);
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(
                 this, R.array.filter_options, android.R.layout.simple_spinner_item);
+
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         filterSpinner.setAdapter(spinnerAdapter);
         filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -117,9 +110,9 @@ public class SubListActivity extends AppCompatActivity {
                     case 1 :
                         tableLayout.removeAllViews();
                         for(final Project project : todoList.getAll()) {
-                            if (project.isChecked()) {
-                                addTodoItem(project);
-                            }
+                           if (project.isChecked()) {
+                               addTodoItem(project);
+                           }
                         }
                         break;
                     case 2 :
@@ -130,6 +123,7 @@ public class SubListActivity extends AppCompatActivity {
                             }
                         }
                         break;
+
                 }
             }
             @Override
@@ -137,7 +131,6 @@ public class SubListActivity extends AppCompatActivity {
             }
         });
         ImageButton filterButton = findViewById(R.id.filter_button);
-
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -153,13 +146,7 @@ public class SubListActivity extends AppCompatActivity {
         loadTodoList(selectedList);
     }
 
-    /**
-     * <p>
-     * Filter and display items in the tableLayout based on a given query
-     * </p>
-     *
-     * @param query The query to filter items by search
-     */
+
     private void filterAndDisplayItems(final String query) {
         tableLayout.removeAllViews();
 
@@ -170,18 +157,11 @@ public class SubListActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * <p>
-     * Add a new todo item to the TableLayout based on the provided project
-     * </p>
-     *
-     * @param project The Project containing the todo item information
-     */
     public void addTodoItem(final Project project) {
-        final TableRow tableRow = new TableRow(SubListActivity.this);
-        final CheckBox checkBox = new CheckBox(SubListActivity.this);
-        final TextView todoView = new TextView(SubListActivity.this);
-        final ImageView closeIcon = new ImageView(SubListActivity.this);
+        final TableRow tableRow = new TableRow(SearchActivity.this);
+        final CheckBox checkBox = new CheckBox(SearchActivity.this);
+        final TextView todoView = new TextView(SearchActivity.this);
+        final ImageView closeIcon = new ImageView(SearchActivity.this);
 
         tableRow.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT));
@@ -204,7 +184,7 @@ public class SubListActivity extends AppCompatActivity {
             public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
 
                 if(isChecked) {
-                    todoView.setTextColor(ContextCompat.getColor(SubListActivity.this, android.R.color.darker_gray));
+                    todoView.setTextColor(ContextCompat.getColor(SearchActivity.this, android.R.color.darker_gray));
                     project.setChecked();
                 } else {
                     todoView.setTextColor(Color.BLACK);
@@ -314,7 +294,7 @@ public class SubListActivity extends AppCompatActivity {
 
     /**
      * <p>
-     * Remove a Todo item from the list, update the tableLayout, and save the updated list
+     * Remove a Todo item from the list, update the TableLayout, and save the updated list
      * </p>
      *
      * @param project The Todo item to be removed
@@ -325,3 +305,4 @@ public class SubListActivity extends AppCompatActivity {
         saveTodoList();
     }
 }
+

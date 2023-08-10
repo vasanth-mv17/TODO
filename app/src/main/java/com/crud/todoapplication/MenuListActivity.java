@@ -25,7 +25,7 @@ import com.crud.todoapplication.model.Project;
 
 /**
  * <p>
- * Representing the main activity of the Todo application
+ * Representing the menu list activity of the Todo application
  * </p>
  *
  * @author vasanth
@@ -90,7 +90,7 @@ public class MenuListActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(final AdapterView<?> adapterView, final View view, final int indexPosition, final long l) {
-                final Intent intent = new Intent(MenuListActivity.this, SubListActivity.class);
+                final Intent intent = new Intent(MenuListActivity.this, SearchActivity.class);
                 selectedList = todoList.get(indexPosition);
                 intent.putExtra("List Reference", selectedList);
                 startActivity(intent);
@@ -121,8 +121,6 @@ public class MenuListActivity extends AppCompatActivity {
             }
         });
     }
-
-
 
     /**
      * <p>

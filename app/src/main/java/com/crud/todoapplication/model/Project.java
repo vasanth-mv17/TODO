@@ -7,13 +7,16 @@ public class Project {
     private String id;
     private String label;
     private boolean isChecked;
+    private boolean completed;
 
     public Project() {
     }
 
     public Project(final String label) {
         this.label = label;
+        this.completed = completed;
         this.id = UUID.randomUUID().toString();
+
     }
 
     public String getId() {
@@ -39,6 +42,14 @@ public class Project {
     public void setChecked() {
         this.isChecked = !this.isChecked;
     }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+//    public void setCompleted(boolean completed) {
+//        this.completed = completed;
+//    }
 
     public String toString() {
         return label;

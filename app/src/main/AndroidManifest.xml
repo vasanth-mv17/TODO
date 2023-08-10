@@ -12,6 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TodoApplication"
         tools:targetApi="31">
+        <activity android:name=".SearchActivity"
+            android:exported="false"/>
         <activity
             android:name=".SubListActivity"
             android:exported="false" />
