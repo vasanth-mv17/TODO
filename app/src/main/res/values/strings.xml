@@ -1,9 +1,25 @@
 <resources>
-    <!-- ... Your other resources ... -->
 
     <string-array name="filter_options">
         <item>All</item>
-        <item>Completed</item>
-        <item>Not Completed</item>
+        <item>Checked</item>
+        <item>Not Checked</item>
     </string-array>
+
+    <string-array name="page_options">
+        <item>10</item>
+        <item>20</item>
+        <item>30</item>
+        <item>40</item>
+        <item>50</item>
+    </string-array>
+
+    <string name="TodoApplication">Todo Application</string>
+    <string name="TodoLists">Todo Lists</string>
+    <string name="addList">Add List</string>
+    <string name="search">Search items</string>
+    <string name="items">Enter the items</string>
+    <string name="add">Add</string>
+    <string name="pageNumber">0/0</string>
+    <string name="todo_lists">TODO Lists</string>
 </resources>
