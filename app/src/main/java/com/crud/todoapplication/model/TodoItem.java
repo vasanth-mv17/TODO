@@ -2,17 +2,17 @@ package com.crud.todoapplication.model;
 
 import java.util.UUID;
 
-public class Project {
+public class TodoItem {
 
     private String id;
     private String label;
     private boolean isChecked;
     private boolean completed;
 
-    public Project() {
+    public TodoItem() {
     }
 
-    public Project(final String label) {
+    public TodoItem(final String label) {
         this.label = label;
         this.completed = completed;
         this.id = UUID.randomUUID().toString();
