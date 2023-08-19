@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 
+import com.crud.todoapplication.FilterActivity;
 import com.crud.todoapplication.ProjectListActivity;
 import com.crud.todoapplication.model.TodoItem;
 import com.crud.todoapplication.service.MenuView;
@@ -74,7 +75,7 @@ public class MenuController {
      * @param indexPosition Refers the index position for the navigate to another activity
      */
     public void onListItemClicked(int indexPosition) {
-        final Intent intent = new Intent(context, ProjectListActivity.class);
+        final Intent intent = new Intent(context, FilterActivity.class);
         selectedList = todoList.get(indexPosition);
         intent.putExtra("List Reference", selectedList);
         context.startActivity(intent);

@@ -25,21 +25,13 @@ import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.crud.todoapplication.controller.ProjectListController;
-import com.crud.todoapplication.model.TodoItem;
 import com.crud.todoapplication.model.ProjectTodoList;
+import com.crud.todoapplication.model.TodoItem;
 import com.crud.todoapplication.service.ProjectView;
 
 import java.util.List;
 
-/**
- * <p>
- * Representing the sub list activity of the Todo application
- * </p>
- *
- * @author vasanth
- * @version 1.0
- */
-public class ProjectListActivity extends AppCompatActivity implements ProjectView {
+public class FilterActivity extends AppCompatActivity implements ProjectView {
 
     private static final String NAME = "CheckBoxState";
     private DrawerLayout drawerLayout;
@@ -55,7 +47,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
     private Spinner filterSpinnerPage;
     private TextView pageNumber;
     private ImageButton previousPageButton;
-    private  ImageButton nextPageButton;
+    private ImageButton nextPageButton;
     private ImageButton filterButton;
     private int currentPage = 1;
     private int pageCapacity = 10;
@@ -116,7 +108,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
             @Override
             public boolean onQueryTextChange(final String newText) {
                 projectListController.onSearchAndDisplayItems(newText);
-                final Filter selectedFilter = Filter.values()[filterSpinner.getSelectedItemPosition()];
+                final ProjectListActivity.Filter selectedFilter = ProjectListActivity.Filter.values()[filterSpinner.getSelectedItemPosition()];
 
                 switch (selectedFilter) {
                     case ALL:
@@ -166,6 +158,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
                         }
                 }
             }
+
             @Override
             public void onNothingSelected(final AdapterView<?> parentView) {
             }
@@ -192,38 +185,18 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
         previousPageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (currentPage > 1) {
-                    currentPage--;
-                    updateTableLayout();
-                    updatePageNumber(pageNumber);
-                }
-
-                if (currentPage == 1) {
-                    previousPageButton.setEnabled(false);
-                    previousPageButton.setColorFilter(Color.GRAY);
-                } else {
-                    previousPageButton.setEnabled(true);
-                    previousPageButton.setColorFilter(null);
-                }
+                navigateToPage(currentPage - 1);
+                updateTableLayout();
+                updatePageNumber(pageNumber);
             }
         });
 
         nextPageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if ((currentPage * pageCapacity) < todoItems.size()) {
-                    currentPage++;
-                    updateTableLayout();
-                    updatePageNumber(pageNumber);
-                }
-
-                if (currentPage == 1) {
-                    previousPageButton.setEnabled(false);
-                    previousPageButton.setColorFilter(Color.GRAY);
-                } else {
-                    previousPageButton.setEnabled(true);
-                    previousPageButton.setColorFilter(null);
-                }
+                navigateToPage(currentPage + 1);
+                updateTableLayout();
+                updatePageNumber(pageNumber);
             }
         });
 
@@ -243,6 +216,58 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
         });
         loadTodoList(selectedList);
         updatePageNumber(pageNumber);
+        pageButtonState();
+    }
+
+    /**
+     * <p>
+     * Navigates to the target page
+     * </p>
+     *
+     * @param targetPage The target page number to navigate to.
+     */
+    private void navigateToPage(final int targetPage) {
+        if (targetPage >= 1 && targetPage <= getTotalPages()) {
+            currentPage = targetPage;
+            updateTableLayout();
+        }
+    }
+
+    /**
+     * <p>
+     * Calculates the total pages required for the todo items
+     * </p>
+     *
+     * @return Returns the total pages for the project
+     */
+    private int getTotalPages() {
+        return (int) Math.ceil((double) todoItems.size() / pageCapacity);
+    }
+
+    /**
+     * <p>
+     * Handles the page button state
+     * </p>
+     */
+    public void pageButtonState() {
+        final int totalPages = getTotalPages();
+
+        if (currentPage == 1) {
+            previousPageButton.setEnabled(false);
+            previousPageButton.setColorFilter(Color.GRAY);
+        } else {
+            previousPageButton.setEnabled(true);
+            previousPageButton.setColorFilter(null);
+        }
+
+        if (currentPage == totalPages) {
+            nextPageButton.setEnabled(false);
+            nextPageButton.setColorFilter(Color.GRAY);
+        } else {
+            nextPageButton.setEnabled(true);
+            nextPageButton.setColorFilter(null);
+        }
+
     }
 
     /**
@@ -317,10 +342,10 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
      * @param todoItem Refer the Project containing the todo item information
      */
     public void addTodoItem(final TodoItem todoItem) {
-        final TableRow tableRow = new TableRow(ProjectListActivity.this);
-        final CheckBox checkBox = new CheckBox(ProjectListActivity.this);
-        final TextView label = new TextView(ProjectListActivity.this);
-        final ImageView closeIcon = new ImageView(ProjectListActivity.this);
+        final TableRow tableRow = new TableRow(FilterActivity.this);
+        final CheckBox checkBox = new CheckBox(FilterActivity.this);
+        final TextView label = new TextView(FilterActivity.this);
+        final ImageView closeIcon = new ImageView(FilterActivity.this);
 
         tableRow.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT));
@@ -342,7 +367,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
-                label.setTextColor(isChecked ? ContextCompat.getColor(ProjectListActivity.this, android.R.color.darker_gray) : Color.BLACK);
+                label.setTextColor(isChecked ? ContextCompat.getColor(FilterActivity.this, android.R.color.darker_gray) : Color.BLACK);
                 todoItem.setChecked();
                 saveCheckBox(todoItem.getLabel(), isChecked);
             }
@@ -381,11 +406,12 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
             final TodoItem todoItem = todoItems.get(i);
             addTodoItem(todoItem);
         }
+        pageButtonState();
     }
 
     /**
      * <p>
-     *  Updates the page number in the layout
+     * Updates the page number in the layout
      * </p>
      *
      * @param pageNumber Represents the layout view of the page number
@@ -416,7 +442,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
      * Save the checked state of a checkbox with a given label into shared preferences
      * </p>
      *
-     * @param label Refers the  label with the checkbox
+     * @param label     Refers the  label with the checkbox
      * @param isChecked Refer the checked state to be saved
      */
     private void saveCheckBox(final String label, final boolean isChecked) {
@@ -477,4 +503,5 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
         updateTableLayout();
         saveTodoList();
     }
+
 }
