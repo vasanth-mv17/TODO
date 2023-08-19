@@ -15,8 +15,11 @@
         <activity
             android:name=".MenuActivity"
             android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".ProjectListActivity"-->
+<!--            android:exported="false" />-->
         <activity
-            android:name=".ProjectListActivity"
+            android:name=".FilterActivity"
             android:exported="false" />
         <activity
             android:name=".SplashActivity"

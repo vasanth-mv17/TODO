@@ -90,23 +90,6 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(final AdapterView<?> adapterView, final View view, final int i, final long l) {
-//                final AlertDialog.Builder builder = new AlertDialog.Builder(MenuActivity.this);
-//                builder.setTitle("Delete List Item");
-//                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(final DialogInterface dialog, final int which) {
-//                        todoList.remove(i);
-//                        ((ArrayAdapter) listView.getAdapter()).notifyDataSetChanged();
-//                    }
-//                });
-//                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(final DialogInterface dialog, final int which) {
-//                    }
-//                });
-//                final AlertDialog dialog = builder.create();
-//                dialog.show();
-//                return true;
                 menuController.onListItemLongClicked(i);
                 return true;
             }
