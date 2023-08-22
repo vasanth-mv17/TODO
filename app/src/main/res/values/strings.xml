@@ -22,4 +22,6 @@
     <string name="add">Add</string>
     <string name="pageNumber">0/0</string>
     <string name="todo_lists">TODO Lists</string>
+    <string name="sort_ascending_description">Ascending</string>
+    <string name="sort_descending_description">Descending</string>
 </resources>

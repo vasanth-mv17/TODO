@@ -1,16 +1,9 @@
 package com.crud.todoapplication.controller;
 
-import android.content.Context;
-import android.content.Intent;
-
-
-import com.crud.todoapplication.FilterActivity;
-import com.crud.todoapplication.ProjectListActivity;
-import com.crud.todoapplication.model.TodoItem;
+import com.crud.todoapplication.MenuActivity;
+import com.crud.todoapplication.model.Project;
+import com.crud.todoapplication.model.ProjectList;
 import com.crud.todoapplication.service.MenuView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>
@@ -23,14 +16,16 @@ import java.util.List;
 public class MenuController {
 
     private MenuView view;
-    private List<String> todoList;
-    private String selectedList;
-    private Context context;
+    //private List<String> projectList;
+    private ProjectList projectList;
+    private MenuActivity menuActivity;
 
-    public MenuController(final Context context, final MenuView view) {
-        this.context = context;
+    public MenuController(final MenuActivity menuActivity, final MenuView view, final ProjectList projectList) {
+       // this.context = context;
         this.view = view;
-        todoList = new ArrayList<>();
+        //projectList = new ArrayList<>();
+        this.menuActivity = menuActivity;
+        this.projectList = projectList;
     }
 
     /**
@@ -49,12 +44,13 @@ public class MenuController {
      *
      * @param name Refer the name to be added to the project
      */
-    public void onNameAdded(final String name) {
+    public void onNameAdded(final String name, final Long id) {
         if (!name.isEmpty()) {
-            final TodoItem todoItem = new TodoItem();
-            todoItem.setLabel(name);
-            todoList.add(todoItem.toString());
-            updateView();
+            final Project project = new Project();
+            project.setId(id);
+            project.setLabel(name);
+            projectList.add(project);
+            //updateView();
         }
     }
 
@@ -64,7 +60,7 @@ public class MenuController {
      * </p>
      */
     public void updateView() {
-        view.updateTodoList(todoList);
+        //view.updateTodoList(projectList);
     }
 
     /**
@@ -74,11 +70,12 @@ public class MenuController {
      *
      * @param indexPosition Refers the index position for the navigate to another activity
      */
-    public void onListItemClicked(int indexPosition) {
-        final Intent intent = new Intent(context, FilterActivity.class);
-        selectedList = todoList.get(indexPosition);
-        intent.putExtra("List Reference", selectedList);
-        context.startActivity(intent);
+    public void onListItemClicked(final Project indexPosition) {
+//        final Intent intent = new Intent(context, ProjectTodoItemActivity.class);
+//        //selectedList = projectList.get(indexPosition);
+//        intent.putExtra("List Reference", selectedList);
+//        context.startActivity(intent);
+        menuActivity.goToListPage(indexPosition);
     }
 
     /**
@@ -86,11 +83,13 @@ public class MenuController {
      * By Long press the list is to be deleted
      * </p>
      *
-     * @param indexPosition Refers the index position for the deletion
+     * @param project Refers the project for the deletion
      */
-    public void onListItemLongClicked(int indexPosition) {
-        todoList.remove(indexPosition);
-        updateView();
+    public void onListItemLongClicked(final Project project) {
+        //projectList.remove(indexPosition);
+        //updateView();
+        projectList.remove(project.getId());
+        menuActivity.removeProjectFromList(project);
     }
 }
 

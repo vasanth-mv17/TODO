@@ -26,5 +26,5 @@ public interface MenuView {
      *
      * @param todoList Refer the list of the todo list to be displayed
      */
-    void updateTodoList(List<String> todoList);
+    void updateTodoList(final List<String> projectList);
 }

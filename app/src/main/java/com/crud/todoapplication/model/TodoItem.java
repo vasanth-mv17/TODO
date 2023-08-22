@@ -1,29 +1,21 @@
 package com.crud.todoapplication.model;
 
-import java.util.UUID;
-
 public class TodoItem {
 
-    private String id;
+    private Long id;
     private String label;
     private boolean isChecked;
-    private boolean completed;
-
-    public TodoItem() {
-    }
+    private Long parentId;
 
     public TodoItem(final String label) {
         this.label = label;
-        this.completed = completed;
-        this.id = UUID.randomUUID().toString();
-
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(final String id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -43,15 +35,16 @@ public class TodoItem {
         this.isChecked = !this.isChecked;
     }
 
-    public boolean isCompleted() {
-        return completed;
-    }
-
-//    public void setCompleted(boolean completed) {
-//        this.completed = completed;
-//    }
-
     public String toString() {
         return label;
     }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(Long parentId) {
+        this.parentId = parentId;
+    }
 }
+
