@@ -26,9 +26,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.crud.todoapplication.controller.ProjectListController;
 import com.crud.todoapplication.model.TodoItem;
-import com.crud.todoapplication.model.ProjectTodoList;
+import com.crud.todoapplication.model.TodoList;
 import com.crud.todoapplication.service.ProjectView;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -39,7 +41,7 @@ import java.util.List;
  * @author vasanth
  * @version 1.0
  */
-public class ProjectListActivity extends AppCompatActivity implements ProjectView {
+public class ProjectTodoItemActivity extends AppCompatActivity implements ProjectView {
 
     private static final String NAME = "CheckBoxState";
     private DrawerLayout drawerLayout;
@@ -47,18 +49,21 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
     private EditText editText;
     private ImageButton menuButton;
     private SearchView searchButton;
-    private String selectedList;
-    private ProjectTodoList projectTodoList;
+    private String selectedProjectName;
+    private Long selectedProjectId;
+    private TodoList todoList;
     private ProjectListController projectListController;
     private List<TodoItem> todoItems;
     private Spinner filterSpinner;
     private Spinner filterSpinnerPage;
     private TextView pageNumber;
     private ImageButton previousPageButton;
-    private  ImageButton nextPageButton;
+    private ImageButton nextPageButton;
     private ImageButton filterButton;
     private int currentPage = 1;
     private int pageCapacity = 10;
+    private static Long id = 0L;
+    private boolean isAscending = true;
 
     /**
      * <p>
@@ -85,12 +90,14 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
         tableLayout = findViewById(R.id.tableLayout);
         editText = findViewById(R.id.todoEditText);
         pageNumber = findViewById(R.id.pageCount);
-        selectedList = getIntent().getStringExtra("List Reference");
-        projectTodoList = new ProjectTodoList(selectedList);
+        selectedProjectId = getIntent().getLongExtra("Project Id", 0L);
+        selectedProjectName = getIntent().getStringExtra("Project name");
+        todoList = new TodoList();
+        todoItems = todoList.getAllItems(selectedProjectId);
 
-        if (null != selectedList) {
+        if (null != selectedProjectName) {
             TextView textView = findViewById(R.id.listName);
-            textView.setText(selectedList);
+            textView.setText(selectedProjectName);
         }
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,7 +152,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
                 switch (selectedFilter) {
                     case CHECKED:
                         tableLayout.removeAllViews();
-                        for (final TodoItem todoItem : projectTodoList.getAll()) {
+                        for (final TodoItem todoItem : todoList.getAllItems()) {
                             if (todoItem.isChecked()) {
                                 addTodoItem(todoItem);
                             }
@@ -153,7 +160,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
                         break;
                     case UNCHECKED:
                         tableLayout.removeAllViews();
-                        for (final TodoItem todoItem : projectTodoList.getAll()) {
+                        for (final TodoItem todoItem : todoList.getAllItems()) {
                             if (!todoItem.isChecked()) {
                                 addTodoItem(todoItem);
                             }
@@ -161,7 +168,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
                         break;
                     default:
                         tableLayout.removeAllViews();
-                        for (final TodoItem todoItem : projectTodoList.getAll()) {
+                        for (final TodoItem todoItem : todoList.getAllItems()) {
                             addTodoItem(todoItem);
                         }
                 }
@@ -170,7 +177,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
             public void onNothingSelected(final AdapterView<?> parentView) {
             }
         });
-        ArrayAdapter<CharSequence> pageSpinnerAdapter = ArrayAdapter.createFromResource(
+        final ArrayAdapter<CharSequence> pageSpinnerAdapter = ArrayAdapter.createFromResource(
                 this, R.array.page_options, android.R.layout.simple_spinner_item);
 
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -241,7 +248,27 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
                 }
             }
         });
-        loadTodoList(selectedList);
+
+        ImageButton sortAscendingButton = findViewById(R.id.sortAscendingButton);
+        ImageButton sortDescendingButton = findViewById(R.id.sortDescendingButton);
+
+        sortAscendingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isAscending = true;
+                updateTableLayout();
+            }
+        });
+
+        sortDescendingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isAscending = false;
+                updateTableLayout();
+            }
+        });
+
+        loadTodoList(selectedProjectName);
         updatePageNumber(pageNumber);
     }
 
@@ -254,6 +281,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
         ALL(),
         CHECKED(),
         UNCHECKED()
+
     }
 
     /**
@@ -266,7 +294,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
     private void displayCheckedItems(final String query) {
         tableLayout.removeAllViews();
 
-        for (final TodoItem todoItem : projectTodoList.getAll()) {
+        for (final TodoItem todoItem : todoList.getAllItems()) {
             if (todoItem.isChecked() && todoItem.getLabel().toLowerCase().contains(query.toLowerCase())) {
                 addTodoItem(todoItem);
             }
@@ -282,7 +310,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
      */
     private void displayUncheckedItems(final String query) {
         tableLayout.removeAllViews();
-        todoItems = projectTodoList.getAll();
+        todoItems = todoList.getAllItems();
 
         for (final TodoItem todoItem : todoItems) {
             if (!todoItem.isChecked() && todoItem.getLabel().toLowerCase().contains(query.toLowerCase())) {
@@ -300,7 +328,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
      */
     public void filterAndDisplayItems(final String query) {
         tableLayout.removeAllViews();
-        todoItems = projectTodoList.getAll();
+        todoItems = todoList.getAllItems();
 
         for (final TodoItem todoItem : todoItems) {
             if (todoItem.getLabel().toLowerCase().contains(query.toLowerCase())) {
@@ -317,10 +345,10 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
      * @param todoItem Refer the Project containing the todo item information
      */
     public void addTodoItem(final TodoItem todoItem) {
-        final TableRow tableRow = new TableRow(ProjectListActivity.this);
-        final CheckBox checkBox = new CheckBox(ProjectListActivity.this);
-        final TextView label = new TextView(ProjectListActivity.this);
-        final ImageView closeIcon = new ImageView(ProjectListActivity.this);
+        final TableRow tableRow = new TableRow(ProjectTodoItemActivity.this);
+        final CheckBox checkBox = new CheckBox(ProjectTodoItemActivity.this);
+        final TextView label = new TextView(ProjectTodoItemActivity.this);
+        final ImageView closeIcon = new ImageView(ProjectTodoItemActivity.this);
 
         tableRow.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT));
@@ -328,11 +356,10 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
         label.setText(todoItem.getLabel());
         tableRow.addView(label);
         closeIcon.setImageResource(R.drawable.baseline_close_24);
-
         closeIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                removeItem(todoItem);
+                removeItem(tableRow, todoItem);
             }
         });
 
@@ -342,7 +369,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
-                label.setTextColor(isChecked ? ContextCompat.getColor(ProjectListActivity.this, android.R.color.darker_gray) : Color.BLACK);
+                label.setTextColor(isChecked ? ContextCompat.getColor(ProjectTodoItemActivity.this, android.R.color.darker_gray) : Color.BLACK);
                 todoItem.setChecked();
                 saveCheckBox(todoItem.getLabel(), isChecked);
             }
@@ -358,7 +385,11 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
         final String todoLabel = editText.getText().toString();
         if (!todoLabel.isEmpty()) {
             TodoItem todoItem = new TodoItem(todoLabel);
-            projectTodoList.add(todoItem);
+            todoItem.setParentId(selectedProjectId);
+            todoItem.setId(++id);
+            todoList.add(todoItem);
+            todoItems = todoList.getAllItems(selectedProjectId);
+
             updateTableLayout();
             updatePageNumber(pageNumber);
             saveTodoList();
@@ -373,7 +404,19 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
      */
     private void updateTableLayout() {
         tableLayout.removeAllViews();
-        todoItems = projectTodoList.getAll();
+        todoItems = todoList.getAllItems();
+
+        Collections.sort(todoItems, new Comparator<TodoItem>() {
+            @Override
+            public int compare(TodoItem item1, TodoItem item2) {
+                if (isAscending) {
+                    return item1.getLabel().compareToIgnoreCase(item2.getLabel());
+                } else {
+                    return item2.getLabel().compareToIgnoreCase(item1.getLabel());
+                }
+            }
+        });
+
         final int startIndex = (currentPage - 1) * pageCapacity;
         final int endIndex = Math.min(startIndex + pageCapacity, todoItems.size());
 
@@ -442,7 +485,7 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
         for (final String todoItem : todoItems) {
             if (!todoItem.isEmpty()) {
                 final TodoItem project = new TodoItem(todoItem);
-                projectTodoList.add(project);
+                todoList.add(project);
             }
         }
         updateTableLayout();
@@ -458,10 +501,10 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         final StringBuilder todoItems = new StringBuilder();
 
-        for (final TodoItem todoItem : projectTodoList.getAll()) {
+        for (final TodoItem todoItem : todoList.getAllItems()) {
             todoItems.append(todoItem.getLabel()).append(",");
         }
-        editor.putString(selectedList, todoItems.toString());
+        editor.putString(selectedProjectName, todoItems.toString());
         editor.apply();
     }
 
@@ -472,9 +515,16 @@ public class ProjectListActivity extends AppCompatActivity implements ProjectVie
      *
      * @param todoItem Refer the Todo item to be removed
      */
-    private void removeItem(final TodoItem todoItem) {
-        projectTodoList.remove(todoItem.getId());
+    private void removeItem(final TableRow tableRow, final TodoItem todoItem) {
+        tableLayout.removeView(tableRow);
+        todoList.remove(todoItem.getId());
+
+        int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
+        if (currentPage > totalPageCount) {
+            currentPage = totalPageCount;
+        }
         updateTableLayout();
+        updatePageNumber(pageNumber);
         saveTodoList();
     }
 }

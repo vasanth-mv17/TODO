@@ -19,7 +19,7 @@
 <!--            android:name=".ProjectListActivity"-->
 <!--            android:exported="false" />-->
         <activity
-            android:name=".FilterActivity"
+            android:name=".ProjectTodoItemActivity"
             android:exported="false" />
         <activity
             android:name=".SplashActivity"
