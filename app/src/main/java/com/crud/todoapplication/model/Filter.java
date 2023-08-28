@@ -1,70 +1,28 @@
 package com.crud.todoapplication.model;
 
-import java.util.List;
-
 public class Filter {
 
-    private String search;
     private String searchAttribute;
-    private String attribute;
-    private Type type;
+    private String sortingAttribute;
     private String filterObjectAttribute;
-    private List<Object> values;
-    private int skip;
-    private int limit;
+    private int skip = 0;
+    private int limit = 5;
 
-    public enum Type {
-        ASC,
-        DESC
-
-    }
 
     public String getFilterObjectAttribute() {
         return filterObjectAttribute;
     }
 
-    public void setFilterObjectAttribute(String filterObjectAttribute) {
+    public void setFilterObjectAttribute(final String filterObjectAttribute) {
         this.filterObjectAttribute = filterObjectAttribute;
     }
 
-    public List<Object> getValues() {
-        return values;
-    }
-
-    public void setValues(List<Object> values) {
-        this.values = values;
-    }
-
     public String getAttribute() {
-        return attribute;
+        return sortingAttribute;
     }
 
-    public void setAttribute(final String attribute) {
-        this.attribute = attribute;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public void setType(final Type type) {
-        this.type = type;
-    }
-
-    public int getSkip() {
-        return skip;
-    }
-
-    public void setSkip(final int skip) {
-        this.skip = skip;
-    }
-
-    public int getLimit() {
-        return limit;
-    }
-
-    public void setLimit(final int limit) {
-        this.limit = limit;
+    public void setAttribute(final String sortingAttribute) {
+        this.sortingAttribute = sortingAttribute;
     }
 
     public String getSearchAttribute() {
@@ -75,11 +33,12 @@ public class Filter {
         this.searchAttribute = searchAttribute;
     }
 
-    public String getSearch() {
-        return search;
+    public int getSkip() {
+        return skip;
     }
 
-    public void setSearch(final String search) {
-        this.search = search;
+    public int getLimit() {
+        return limit;
     }
+
 }
