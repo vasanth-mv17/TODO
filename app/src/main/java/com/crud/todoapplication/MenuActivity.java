@@ -58,6 +58,7 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
     private TextView userName;
     private TextView userTitle;
     private static Long id = 0L;
+    private static Long userId = 0L;
 
     /**
      * <p>
@@ -97,6 +98,7 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
             @Override
             public void onClick(View view) {
                 final Intent intent = new Intent(MenuActivity.this, FormPageActivity.class);
+
                 intent.putExtra("Name", userName.getText().toString());
                 intent.putExtra("Title", userTitle.getText().toString());
                 startActivityIfNeeded(intent, REQUEST_CODE);

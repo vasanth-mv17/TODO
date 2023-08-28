@@ -24,4 +24,14 @@
     <string name="todo_lists">TODO Lists</string>
     <string name="sort_ascending_description">Ascending</string>
     <string name="sort_descending_description">Descending</string>
+    <string name="project_title">Project Title</string>
+    <string name="user_title">User title</string>
+    <string name="user">User</string>
+    <string name="u">U</string>
+    <string name="enter_your_name">Enter Your Name</string>
+    <string name="enter_your_title">Enter Your Title</string>
+    <string name="name">Name</string>
+    <string name="title">Title</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
 </resources>

@@ -1,6 +1,5 @@
 package com.crud.todoapplication;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -23,31 +22,47 @@ public class FormPageActivity extends AppCompatActivity {
     private Button saveButton;
     private Button cancelButton;
     private User user;
+    private static Long id = 0L;
 
-    @SuppressLint("MissingInflatedId")
+    @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_page);
 
         user = new User();
+        user.setId(++id);
+
+        initializeView();
+        setProfileIcon();
+        setListeners();
+    }
+
+    private void initializeView() {
         backMenuButton = findViewById(R.id.backMenuButton);
         profileIcon = findViewById(R.id.profileIcon);
         user_name = findViewById(R.id.editTextText);
         user_title = findViewById(R.id.editTextText2);
+
         final String existingName = getIntent().getStringExtra("Name");
         final String existingTitle = getIntent().getStringExtra("Title");
-        final String[] nameWords = existingName.split(" ");
+//        user_name.setText(existingName);
+//        user_title.setText(existingTitle);
+    }
+
+    private void setProfileIcon() {
+        final String name = user_name.getText().toString();
+        final String[] nameWords = name.split(" ");
         final StringBuilder profileText = new StringBuilder();
 
         for (final String word : nameWords) {
-
-            if (! word.isEmpty()) {
+            if (!word.isEmpty()) {
                 profileText.append(Character.toUpperCase(word.charAt(0)));
             }
         }
-        user_name.setText(existingName);
-        user_title.setText(existingTitle);
         profileIcon.setText(profileText);
+    }
+
+    private void setListeners() {
         backMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -61,25 +76,17 @@ public class FormPageActivity extends AppCompatActivity {
             public void onClick(View view) {
                 final String name = user_name.getText().toString();
                 final String title = user_title.getText().toString();
-                final Intent resultantIntent = new Intent();
-                final String[] words = name.split(" ");
-                final StringBuilder profile = new StringBuilder();
 
+                user.setId(++id);
                 user.setName(name);
                 user.setTitle(title);
 
-                for (final String word : words) {
-
-                    if (! word.isEmpty()) {
-                        profile.append(Character.toUpperCase(word.charAt(0)));
-                    }
-                }
-
+                final Intent resultantIntent = new Intent();
                 resultantIntent.putExtra("User Name", user.getName());
                 resultantIntent.putExtra("User Title", user.getTitle());
 
                 if (!TextUtils.isEmpty(name)) {
-                    profileIcon.setText(profile);
+                    setProfileIcon();
                 }
                 setResult(RESULT_OK, resultantIntent);
                 finish();
@@ -93,7 +100,5 @@ public class FormPageActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
-
-
     }
 }

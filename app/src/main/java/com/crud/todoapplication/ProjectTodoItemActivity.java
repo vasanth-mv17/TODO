@@ -415,16 +415,16 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
     public void addNewTodoItem() {
         final String todoLabel = editText.getText().toString();
         if (!todoLabel.isEmpty()) {
-            TodoItem todoItem = new TodoItem(todoLabel);
+            final TodoItem todoItem = new TodoItem(todoLabel);
             todoItem.setParentId(selectedProjectId);
             todoItem.setId(++id);
-
             todoList.add(todoItem);
             todoItems = todoList.getAllItems();
-            int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
-            if (1 == todoItems.size() % pageCapacity && currentPage == totalPageCount - 1) {
-                currentPage = totalPageCount;
-            }
+//            int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
+
+//            if (1 == todoItems.size() % pageCapacity && currentPage == totalPageCount - 1) {
+//                currentPage = totalPageCount;
+//            }
 
             pageCapacity = 10;
             pageNumber.setVisibility(View.VISIBLE);
