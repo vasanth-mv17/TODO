@@ -15,9 +15,9 @@
         <activity
             android:name=".MenuActivity"
             android:exported="false" />
-<!--        <activity-->
-<!--            android:name=".ProjectListActivity"-->
-<!--            android:exported="false" />-->
+        <activity
+            android:name=".FormPageActivity"
+            android:exported="false" />
         <activity
             android:name=".ProjectTodoItemActivity"
             android:exported="false" />

@@ -29,6 +29,7 @@ import com.crud.todoapplication.model.TodoItem;
 import com.crud.todoapplication.model.TodoList;
 import com.crud.todoapplication.service.ProjectView;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -44,26 +45,32 @@ import java.util.List;
 public class ProjectTodoItemActivity extends AppCompatActivity implements ProjectView {
 
     private static final String NAME = "CheckBoxState";
+
     private DrawerLayout drawerLayout;
     private TableLayout tableLayout;
     private EditText editText;
     private ImageButton menuButton;
     private SearchView searchButton;
-    private String selectedProjectName;
-    private Long selectedProjectId;
-    private TodoList todoList;
-    private ProjectListController projectListController;
-    private List<TodoItem> todoItems;
     private Spinner filterSpinner;
     private Spinner filterSpinnerPage;
     private TextView pageNumber;
+    private  TextView textView;
     private ImageButton previousPageButton;
     private ImageButton nextPageButton;
     private ImageButton filterButton;
+    private Button addButton;
+
+    private String selectedProjectName;
+    private Long selectedProjectId;
+    private TodoList todoList;
+    private com.crud.todoapplication.model.Filter filter;
+    private ProjectListController projectListController;
+    private TodoItem todoItem = new TodoItem();
+    private List<TodoItem> todoItems;
+
     private int currentPage = 1;
     private int pageCapacity = 10;
     private static Long id = 0L;
-    private boolean isAscending = true;
 
     /**
      * <p>
@@ -78,11 +85,46 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub_list);
 
-        projectListController = new ProjectListController(this);
+        initializeViews();
+        initializeListeners();
+        initializeData();
+
+        loadTodoList(selectedProjectName);
+//        updatePageNumber(pageNumber);
+
+//        if (null != todoItems) {
+//            //loadTodoList(selectedProjectName);
+//            updatePageNumber(pageNumber);
+//        }
+//        else {
+//            pageNumber.setVisibility(View.GONE);
+//            previousPageButton.setVisibility(View.GONE);
+//            nextPageButton.setVisibility(View.GONE);
+//        }
+        if (null == todoItems ) {
+            currentPage = 0;
+            updatePageNumber(pageNumber);
+        }
+    }
+
+    /**
+     * <p>
+     * Enum for filter content
+     * </p>
+     */
+    public enum Status {
+        ALL(),
+        CHECKED(),
+        UNCHECKED()
+
+    }
+
+    public void initializeViews() {
         drawerLayout = findViewById(R.id.drawerLayout);
         menuButton = findViewById(R.id.menuButton);
         searchButton = findViewById(R.id.searchView);
         filterButton = findViewById(R.id.filter_button);
+        addButton = findViewById(R.id.button);
         filterSpinner = findViewById(R.id.filterSpinner);
         filterSpinnerPage = findViewById(R.id.filterSpinnerPage);
         previousPageButton = findViewById(R.id.prev_page);
@@ -90,22 +132,16 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
         tableLayout = findViewById(R.id.tableLayout);
         editText = findViewById(R.id.todoEditText);
         pageNumber = findViewById(R.id.pageCount);
-        selectedProjectId = getIntent().getLongExtra("Project Id", 0L);
-        selectedProjectName = getIntent().getStringExtra("Project name");
-        todoList = new TodoList();
-        todoItems = todoList.getAllItems(selectedProjectId);
+        textView = findViewById(R.id.listName);
+    }
 
-        if (null != selectedProjectName) {
-            TextView textView = findViewById(R.id.listName);
-            textView.setText(selectedProjectName);
-        }
+    public void initializeListeners() {
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 onBackPressed();
             }
         });
-        final Button addButton = findViewById(R.id.button);
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,9 +159,9 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
             @Override
             public boolean onQueryTextChange(final String newText) {
                 projectListController.onSearchAndDisplayItems(newText);
-                final Filter selectedFilter = Filter.values()[filterSpinner.getSelectedItemPosition()];
-
-                switch (selectedFilter) {
+                final Status selectedStatus = Status.values()[filterSpinner.getSelectedItemPosition()];
+                
+                switch (selectedStatus) {
                     case ALL:
                         filterAndDisplayItems(newText);
                         break;
@@ -136,6 +172,8 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
                         displayUncheckedItems(newText);
                         break;
                 }
+                refreshUpdateTableLayout();
+                updatePageNumber(pageNumber);
                 return true;
             }
         });
@@ -147,31 +185,25 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
         filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(final AdapterView<?> parentView, final View selectedItemView, final int position, final long id) {
-                final Filter selectedFilter = Filter.values()[position];
+                final Status selectedStatus = Status.values()[position];
+                filter.setSearchAttribute(searchButton.getQuery().toString());
 
-                switch (selectedFilter) {
+                switch (selectedStatus) {
+                    case ALL:
+                        filter.setAttribute("label");
+                        break;
                     case CHECKED:
-                        tableLayout.removeAllViews();
-                        for (final TodoItem todoItem : todoList.getAllItems()) {
-                            if (todoItem.isChecked()) {
-                                addTodoItem(todoItem);
-                            }
-                        }
+                        filter.setAttribute("isChecked");
                         break;
                     case UNCHECKED:
-                        tableLayout.removeAllViews();
-                        for (final TodoItem todoItem : todoList.getAllItems()) {
-                            if (!todoItem.isChecked()) {
-                                addTodoItem(todoItem);
-                            }
-                        }
+                        filter.setAttribute("unChecked");
                         break;
-                    default:
-                        tableLayout.removeAllViews();
-                        for (final TodoItem todoItem : todoList.getAllItems()) {
-                            addTodoItem(todoItem);
-                        }
                 }
+
+                todoItems = todoList.getAllFilterItems(selectedStatus);
+                currentPage = 1;
+                refreshUpdateTableLayout();
+                updatePageNumber(pageNumber);
             }
             @Override
             public void onNothingSelected(final AdapterView<?> parentView) {
@@ -249,39 +281,19 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
             }
         });
 
-        ImageButton sortAscendingButton = findViewById(R.id.sortAscendingButton);
-        ImageButton sortDescendingButton = findViewById(R.id.sortDescendingButton);
-
-        sortAscendingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isAscending = true;
-                updateTableLayout();
-            }
-        });
-
-        sortDescendingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isAscending = false;
-                updateTableLayout();
-            }
-        });
-
-        loadTodoList(selectedProjectName);
-        updatePageNumber(pageNumber);
     }
 
-    /**
-     * <p>
-     * Enum for filter content
-     * </p>
-     */
-    public enum Filter {
-        ALL(),
-        CHECKED(),
-        UNCHECKED()
+    private void initializeData() {
+        projectListController = new ProjectListController(this);
+        selectedProjectId = getIntent().getLongExtra("Project Id", 0L);
+        selectedProjectName = getIntent().getStringExtra("Project name");
+        todoList = new TodoList();
+        filter = new com.crud.todoapplication.model.Filter();
+//        todoItems = todoList.getAllItems();
 
+        if (selectedProjectName != null) {
+            textView.setText(selectedProjectName);
+        }
     }
 
     /**
@@ -293,12 +305,19 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
      */
     private void displayCheckedItems(final String query) {
         tableLayout.removeAllViews();
+        filter.setSearchAttribute(query);
+        todoItems = todoList.getAllItems();
+        List<TodoItem> searchCheckedItems = new ArrayList<>();
 
-        for (final TodoItem todoItem : todoList.getAllItems()) {
-            if (todoItem.isChecked() && todoItem.getLabel().toLowerCase().contains(query.toLowerCase())) {
-                addTodoItem(todoItem);
+        for (final TodoItem todoItem : todoItems) {
+            if (todoItem.isChecked() && todoItem.getLabel().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
+//                addTodoItem(todoItem);
+                searchCheckedItems.add(todoItem);
             }
         }
+        todoItems = searchCheckedItems;
+        currentPage = 1;
+
     }
 
     /**
@@ -310,13 +329,19 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
      */
     private void displayUncheckedItems(final String query) {
         tableLayout.removeAllViews();
+        filter.setSearchAttribute(query);
         todoItems = todoList.getAllItems();
+        List<TodoItem> searchUnCheckedItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
-            if (!todoItem.isChecked() && todoItem.getLabel().toLowerCase().contains(query.toLowerCase())) {
-                addTodoItem(todoItem);
+            if (!todoItem.isChecked() && todoItem.getLabel().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
+//                addTodoItem(todoItem);
+                searchUnCheckedItems.add(todoItem);
             }
         }
+        todoItems = searchUnCheckedItems;
+        currentPage = 1;
+
     }
 
     /**
@@ -328,13 +353,19 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
      */
     public void filterAndDisplayItems(final String query) {
         tableLayout.removeAllViews();
+        filter.setSearchAttribute(query);
         todoItems = todoList.getAllItems();
+        List<TodoItem> searchAllItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
-            if (todoItem.getLabel().toLowerCase().contains(query.toLowerCase())) {
-                addTodoItem(todoItem);
+            if (todoItem.getLabel().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
+                searchAllItems.add(todoItem);
+//                addTodoItem(todoItem);
             }
         }
+        todoItems = searchAllItems;
+        currentPage = 1;
+
     }
 
     /**
@@ -387,8 +418,20 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
             TodoItem todoItem = new TodoItem(todoLabel);
             todoItem.setParentId(selectedProjectId);
             todoItem.setId(++id);
+
             todoList.add(todoItem);
-            todoItems = todoList.getAllItems(selectedProjectId);
+            todoItems = todoList.getAllItems();
+            int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
+            if (1 == todoItems.size() % pageCapacity && currentPage == totalPageCount - 1) {
+                currentPage = totalPageCount;
+            }
+
+            pageCapacity = 10;
+            pageNumber.setVisibility(View.VISIBLE);
+            previousPageButton.setEnabled(true);
+            previousPageButton.setColorFilter(null);
+            nextPageButton.setEnabled(true);
+            nextPageButton.setColorFilter(null);
 
             updateTableLayout();
             updatePageNumber(pageNumber);
@@ -409,11 +452,8 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
         Collections.sort(todoItems, new Comparator<TodoItem>() {
             @Override
             public int compare(TodoItem item1, TodoItem item2) {
-                if (isAscending) {
-                    return item1.getLabel().compareToIgnoreCase(item2.getLabel());
-                } else {
-                    return item2.getLabel().compareToIgnoreCase(item1.getLabel());
-                }
+                return item1.getSortingValue(filter.getAttribute())
+                        .compareToIgnoreCase(item2.getSortingValue(filter.getAttribute()));
             }
         });
 
@@ -426,6 +466,26 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
         }
     }
 
+    private void refreshUpdateTableLayout() {
+        tableLayout.removeAllViews();
+       // todoItems = todoList.getAllItems();
+
+        Collections.sort(todoItems, new Comparator<TodoItem>() {
+            @Override
+            public int compare(TodoItem item1, TodoItem item2) {
+                return item1.getSortingValue(filter.getAttribute())
+                        .compareToIgnoreCase(item2.getSortingValue(filter.getAttribute()));
+            }
+        });
+
+        final int startIndex = (currentPage - 1) * pageCapacity;
+        final int endIndex = Math.min(startIndex + pageCapacity, todoItems.size());
+
+        for (int i = startIndex; i < endIndex; i++) {
+            final TodoItem todoItem = todoItems.get(i);
+            addTodoItem(todoItem);
+        }
+    }
     /**
      * <p>
      *  Updates the page number in the layout
@@ -515,16 +575,55 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
      *
      * @param todoItem Refer the Todo item to be removed
      */
+//    private void removeItem(final TableRow tableRow, final TodoItem todoItem) {
+//        tableLayout.removeView(tableRow);
+//        todoList.remove(todoItem.getId());
+//
+//
+//        int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
+//        if (currentPage > totalPageCount) {
+//            currentPage = totalPageCount;
+//        }
+//
+//        updateTableLayout();
+//        updatePageNumber(pageNumber);
+//        saveTodoList();
+//    }
+    //        todoItems = todoList.getAllItems();
+//        todoItems.size();
+    //        if (todoItems.isEmpty()) {
+//            currentPage = 0;
+//            updatePageNumber(pageNumber);
+//        }
     private void removeItem(final TableRow tableRow, final TodoItem todoItem) {
+        int previousTotalPageCount = (int) Math.ceil((double) todoItems.size() / pageCapacity);
         tableLayout.removeView(tableRow);
         todoList.remove(todoItem.getId());
 
-        int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
+        todoItems = todoList.getAllItems();
+        int totalPageCount = (int) Math.ceil((double) todoItems.size() / pageCapacity);
+
         if (currentPage > totalPageCount) {
             currentPage = totalPageCount;
         }
-        updateTableLayout();
-        updatePageNumber(pageNumber);
+
+        if (todoItems.isEmpty()) {
+            currentPage = 0;
+            pageCapacity = 0;
+            pageNumber.setVisibility(View.GONE);
+            previousPageButton.setEnabled(false);
+            previousPageButton.setColorFilter(Color.GRAY);
+            nextPageButton.setEnabled(false);
+            nextPageButton.setColorFilter(Color.GRAY);
+        } else {
+            pageCapacity = 10;
+            updatePageNumber(pageNumber);
+            if (previousTotalPageCount > totalPageCount) {
+                updateTableLayout();
+            }
+        }
+
         saveTodoList();
     }
+
 }

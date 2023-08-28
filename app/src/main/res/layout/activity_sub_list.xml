@@ -108,31 +108,31 @@
                 android:textAlignment="center" />
 
         </LinearLayout>
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="51dp">
+<!--        <RelativeLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="51dp">-->
 
-            <ImageButton
-                android:id="@+id/sortAscendingButton"
-                android:layout_width="120dp"
-                android:layout_height="200dp"
-                android:layout_marginStart="10sp"
-                android:layout_marginTop="16dp"
-                android:contentDescription="@string/sort_ascending_description"
-                android:src="@drawable/baseline_sort_by_alpha_24" />
+<!--            <ImageButton-->
+<!--                android:id="@+id/sortAscendingButton"-->
+<!--                android:layout_width="120dp"-->
+<!--                android:layout_height="200dp"-->
+<!--                android:layout_marginStart="10sp"-->
+<!--                android:layout_marginTop="16dp"-->
+<!--                android:contentDescription="@string/sort_ascending_description"-->
+<!--                android:src="@drawable/baseline_sort_by_alpha_24" />-->
 
-            <ImageButton
-                android:id="@+id/sortDescendingButton"
-                android:layout_width="120dp"
-                android:layout_height="200dp"
-                android:layout_marginStart="150sp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="150sp"
-                android:contentDescription="@string/sort_descending_description"
-                android:src="@drawable/baseline_sort_by_alpha_24"
-                android:textAlignment="center" />
+<!--            <ImageButton-->
+<!--                android:id="@+id/sortDescendingButton"-->
+<!--                android:layout_width="120dp"-->
+<!--                android:layout_height="200dp"-->
+<!--                android:layout_marginStart="150sp"-->
+<!--                android:layout_marginTop="16dp"-->
+<!--                android:layout_marginEnd="150sp"-->
+<!--                android:contentDescription="@string/sort_descending_description"-->
+<!--                android:src="@drawable/baseline_sort_by_alpha_24"-->
+<!--                android:textAlignment="center" />-->
 
-        </RelativeLayout>
+<!--        </RelativeLayout>-->
 
         <ScrollView
             android:layout_width="match_parent"
@@ -164,7 +164,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/baseline_arrow_back_ios_new_24"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
+                android:background="?attr/selectableItemBackgroundBorderless"
+                />
 
             <TextView
                 android:id="@+id/pageCount"
