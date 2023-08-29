@@ -23,6 +23,7 @@ public class FormPageActivity extends AppCompatActivity {
     private Button cancelButton;
     private User user;
     private static Long id = 0L;
+    private DatabaseConnection databaseConnection;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -30,6 +31,7 @@ public class FormPageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_form_page);
 
         user = new User();
+        databaseConnection = new DatabaseConnection(this);
         user.setId(++id);
 
         initializeView();
@@ -80,8 +82,10 @@ public class FormPageActivity extends AppCompatActivity {
                 user.setId(++id);
                 user.setName(name);
                 user.setTitle(title);
+                databaseConnection.insertUser(name, title);
 
                 final Intent resultantIntent = new Intent();
+                resultantIntent.putExtra("User Id", user.getId());
                 resultantIntent.putExtra("User Name", user.getName());
                 resultantIntent.putExtra("User Title", user.getTitle());
 

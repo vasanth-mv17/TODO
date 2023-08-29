@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.crud.todoapplication.controller.ProjectListController;
+import com.crud.todoapplication.model.Filter;
 import com.crud.todoapplication.model.TodoItem;
 import com.crud.todoapplication.model.TodoList;
 import com.crud.todoapplication.service.ProjectView;
@@ -71,6 +72,8 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
     private int currentPage = 1;
     private int pageCapacity = 10;
     private static Long id = 0L;
+    private int skip = 0;
+    private int limit = 5;
 
     /**
      * <p>
@@ -90,17 +93,6 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
         initializeData();
 
         loadTodoList(selectedProjectName);
-//        updatePageNumber(pageNumber);
-
-//        if (null != todoItems) {
-//            //loadTodoList(selectedProjectName);
-//            updatePageNumber(pageNumber);
-//        }
-//        else {
-//            pageNumber.setVisibility(View.GONE);
-//            previousPageButton.setVisibility(View.GONE);
-//            nextPageButton.setVisibility(View.GONE);
-//        }
         if (null == todoItems ) {
             currentPage = 0;
             updatePageNumber(pageNumber);
@@ -420,11 +412,11 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
             todoItem.setId(++id);
             todoList.add(todoItem);
             todoItems = todoList.getAllItems();
-//            int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
+            int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
 
-//            if (1 == todoItems.size() % pageCapacity && currentPage == totalPageCount - 1) {
-//                currentPage = totalPageCount;
-//            }
+            if (1 == todoItems.size() % pageCapacity && currentPage == totalPageCount - 1) {
+                currentPage = totalPageCount;
+            }
 
             pageCapacity = 10;
             pageNumber.setVisibility(View.VISIBLE);
@@ -478,10 +470,11 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
             }
         });
 
-        final int startIndex = (currentPage - 1) * pageCapacity;
-        final int endIndex = Math.min(startIndex + pageCapacity, todoItems.size());
 
-        for (int i = startIndex; i < endIndex; i++) {
+        final int startItem = (currentPage - 1) * pageCapacity;
+        final int endItem = Math.min(startItem + pageCapacity, todoItems.size());
+
+        for (int i = startItem; i < endItem; i++) {
             final TodoItem todoItem = todoItems.get(i);
             addTodoItem(todoItem);
         }
@@ -625,5 +618,6 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
 
         saveTodoList();
     }
+
 
 }

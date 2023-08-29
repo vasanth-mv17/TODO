@@ -8,7 +8,6 @@ import android.text.InputType;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -24,15 +23,6 @@ import com.crud.todoapplication.controller.MenuController;
 import com.crud.todoapplication.model.Project;
 import com.crud.todoapplication.model.ProjectList;
 import com.crud.todoapplication.service.MenuView;
-
-import de.hdodenhof.circleimageview.CircleImageView;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.Typeface;
 
 import java.util.List;
 
@@ -53,12 +43,13 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
     private ProjectList projectList;
     private ImageButton menuButton;
     private MenuController menuController;
+    private DatabaseConnection databaseConnection;
     private static final int REQUEST_CODE = 1;
     private TextView profileIcon;
     private TextView userName;
     private TextView userTitle;
     private static Long id = 0L;
-    private static Long userId = 0L;
+    private Long updatedUserId;
 
     /**
      * <p>
@@ -74,8 +65,9 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
         setContentView(R.layout.activity_menu_list);
 
         projectList = new ProjectList();
+        databaseConnection = new DatabaseConnection(this);
 
-        menuController = new MenuController(this, this, projectList);
+        menuController = new MenuController(this, this, projectList,this);
         drawerLayout = findViewById(R.id.drawerLayout);
         menuButton = findViewById(R.id.menuButton);
         nameListView = findViewById(R.id.nameListView);
@@ -136,6 +128,7 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+            updatedUserId = data.getLongExtra("User Id",0);
             final String updatedUserName = data.getStringExtra("User Name");
             final String updatedUserTitle = data.getStringExtra("User Title");
             assert updatedUserName != null;
@@ -199,7 +192,7 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
                     public void onClick(final DialogInterface dialog, final int which) {
                         final String name = editText.getText().toString();
 
-                        menuController.onNameAdded(name, ++id);
+                        menuController.onNameAdded(name, ++id, updatedUserId);
                         arrayAdapter.notifyDataSetChanged();
                     }
                 })
@@ -221,6 +214,7 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
 //        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, todoList);
 //        nameListView.setAdapter(arrayAdapter);
     }
+
 }
 
 
