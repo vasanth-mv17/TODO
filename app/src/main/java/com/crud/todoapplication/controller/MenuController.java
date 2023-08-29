@@ -1,5 +1,8 @@
 package com.crud.todoapplication.controller;
 
+import android.content.Context;
+
+import com.crud.todoapplication.DatabaseConnection;
 import com.crud.todoapplication.MenuActivity;
 import com.crud.todoapplication.model.Project;
 import com.crud.todoapplication.model.ProjectList;
@@ -16,16 +19,16 @@ import com.crud.todoapplication.service.MenuView;
 public class MenuController {
 
     private MenuView view;
-    //private List<String> projectList;
     private ProjectList projectList;
     private MenuActivity menuActivity;
+    private DatabaseConnection databaseConnection;
 
-    public MenuController(final MenuActivity menuActivity, final MenuView view, final ProjectList projectList) {
-       // this.context = context;
+
+    public MenuController(final MenuActivity menuActivity, final MenuView view, final ProjectList projectList,final Context context) {
         this.view = view;
-        //projectList = new ArrayList<>();
         this.menuActivity = menuActivity;
         this.projectList = projectList;
+        this.databaseConnection = new DatabaseConnection(context);
     }
 
     /**
@@ -44,13 +47,14 @@ public class MenuController {
      *
      * @param name Refer the name to be added to the project
      */
-    public void onNameAdded(final String name, final Long id) {
+    public void onNameAdded(final String name, final Long id, final Long userId) {
         if (!name.isEmpty()) {
             final Project project = new Project();
+            project.setUserId(userId);
             project.setId(id);
             project.setLabel(name);
             projectList.add(project);
-            //updateView();
+            databaseConnection.insertProject(project);
         }
     }
 

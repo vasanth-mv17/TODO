@@ -8,7 +8,6 @@ public class Filter {
     private int skip = 0;
     private int limit = 5;
 
-
     public String getFilterObjectAttribute() {
         return filterObjectAttribute;
     }
@@ -32,7 +31,6 @@ public class Filter {
     public void setSearchAttribute(final String searchAttribute) {
         this.searchAttribute = searchAttribute;
     }
-
     public int getSkip() {
         return skip;
     }
@@ -41,4 +39,11 @@ public class Filter {
         return limit;
     }
 
+//    public void setSkip(final int skip) {
+//        this.skip = skip;
+//    }
+//
+//    public void setLimit(final int limit) {
+//        this.limit = limit;
+//    }
 }
