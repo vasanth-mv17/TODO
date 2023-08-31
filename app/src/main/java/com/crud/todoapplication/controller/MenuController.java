@@ -42,24 +42,6 @@ public class MenuController {
 
     /**
      * <p>
-     * Called when a new name is added to the project
-     * </p>
-     *
-     * @param name Refer the name to be added to the project
-     */
-    public void onNameAdded(final String name, final Long id, final Long userId) {
-        if (!name.isEmpty()) {
-            final Project project = new Project();
-            project.setUserId(userId);
-            project.setId(id);
-            project.setLabel(name);
-            projectList.add(project);
-            databaseConnection.insertProject(project);
-        }
-    }
-
-    /**
-     * <p>
      * Updates the view with the current todo list
      * </p>
      */
@@ -75,10 +57,6 @@ public class MenuController {
      * @param indexPosition Refers the index position for the navigate to another activity
      */
     public void onListItemClicked(final Project indexPosition) {
-//        final Intent intent = new Intent(context, ProjectTodoItemActivity.class);
-//        //selectedList = projectList.get(indexPosition);
-//        intent.putExtra("List Reference", selectedList);
-//        context.startActivity(intent);
         menuActivity.goToListPage(indexPosition);
     }
 
@@ -90,8 +68,6 @@ public class MenuController {
      * @param project Refers the project for the deletion
      */
     public void onListItemLongClicked(final Project project) {
-        //projectList.remove(indexPosition);
-        //updateView();
         projectList.remove(project.getId());
         menuActivity.removeProjectFromList(project);
     }

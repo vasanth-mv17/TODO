@@ -34,13 +34,23 @@
                 android:layout_marginStart="8dp"/>
 
             <ImageButton
+                android:id="@+id/addButton"
+                android:layout_width="35dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginEnd="58dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/baseline_add_24" />
+
+            <ImageButton
                 android:id="@+id/filter_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerInParent="true"
-                android:src="@drawable/baseline_filter_alt_24"
-                android:background="?attr/selectableItemBackgroundBorderless"/>
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/baseline_filter_alt_24" />
 
         </RelativeLayout>
         <LinearLayout
@@ -76,7 +86,8 @@
             android:layout_marginTop="16dp"
             android:layout_marginStart="10sp"
             android:layout_marginEnd="10sp"
-            android:hint="@string/items" />
+            android:hint="@string/items"
+            android:visibility="gone"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -92,7 +103,8 @@
                 android:layout_marginTop="16dp"
                 android:drawableLeft="@drawable/baseline_add_24"
                 android:text="@string/add"
-                android:textSize="18dp" />
+                android:textSize="18dp"
+                android:visibility="gone"/>
 
             <Spinner
                 android:id="@+id/filterSpinnerPage"
@@ -108,31 +120,6 @@
                 android:textAlignment="center" />
 
         </LinearLayout>
-<!--        <RelativeLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="51dp">-->
-
-<!--            <ImageButton-->
-<!--                android:id="@+id/sortAscendingButton"-->
-<!--                android:layout_width="120dp"-->
-<!--                android:layout_height="200dp"-->
-<!--                android:layout_marginStart="10sp"-->
-<!--                android:layout_marginTop="16dp"-->
-<!--                android:contentDescription="@string/sort_ascending_description"-->
-<!--                android:src="@drawable/baseline_sort_by_alpha_24" />-->
-
-<!--            <ImageButton-->
-<!--                android:id="@+id/sortDescendingButton"-->
-<!--                android:layout_width="120dp"-->
-<!--                android:layout_height="200dp"-->
-<!--                android:layout_marginStart="150sp"-->
-<!--                android:layout_marginTop="16dp"-->
-<!--                android:layout_marginEnd="150sp"-->
-<!--                android:contentDescription="@string/sort_descending_description"-->
-<!--                android:src="@drawable/baseline_sort_by_alpha_24"-->
-<!--                android:textAlignment="center" />-->
-
-<!--        </RelativeLayout>-->
 
         <ScrollView
             android:layout_width="match_parent"

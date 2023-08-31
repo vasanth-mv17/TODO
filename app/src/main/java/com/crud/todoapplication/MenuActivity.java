@@ -22,6 +22,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.crud.todoapplication.controller.MenuController;
 import com.crud.todoapplication.model.Project;
 import com.crud.todoapplication.model.ProjectList;
+import com.crud.todoapplication.model.User;
 import com.crud.todoapplication.service.MenuView;
 
 import java.util.List;
@@ -42,6 +43,7 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
     private List<Project> projects;
     private ProjectList projectList;
     private ImageButton menuButton;
+    private User user;
     private MenuController menuController;
     private DatabaseConnection databaseConnection;
     private static final int REQUEST_CODE = 1;
@@ -49,7 +51,7 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
     private TextView userName;
     private TextView userTitle;
     private static Long id = 0L;
-    private Long updatedUserId;
+    private Long userId;
 
     /**
      * <p>
@@ -66,18 +68,27 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
 
         projectList = new ProjectList();
         databaseConnection = new DatabaseConnection(this);
-
         menuController = new MenuController(this, this, projectList,this);
         drawerLayout = findViewById(R.id.drawerLayout);
         menuButton = findViewById(R.id.menuButton);
         nameListView = findViewById(R.id.nameListView);
-        projects = projectList.getAllList();
         profileIcon = findViewById(R.id.profileIcon);
         userName = findViewById(R.id.profileName);
         userTitle = findViewById(R.id.profileTitle);
-        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, projects);
+        user = databaseConnection.getUserProfile();
+        projects = projectList.getAllList();
 
+        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, projects);
+        loadProjectsFromDataBase();
         nameListView.setAdapter(arrayAdapter);
+
+        if (null != user) {
+            userName.setText(user.getName());
+            userTitle.setText(user.getTitle());
+            profileIcon.setText(user.setProfileIcon());
+            userId = user.getId();
+        }
+
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
@@ -122,37 +133,37 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
                 return true;
             }
         });
+
+    }
+
+    private void loadProjectsFromDataBase() {
+        projects = databaseConnection.getAllProjects();
+
+        arrayAdapter.clear();
+        arrayAdapter.addAll(projects);
+        arrayAdapter.notifyDataSetChanged();
     }
 
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-            updatedUserId = data.getLongExtra("User Id",0);
-            final String updatedUserName = data.getStringExtra("User Name");
-            final String updatedUserTitle = data.getStringExtra("User Title");
-            assert updatedUserName != null;
-            final String[] nameWords = updatedUserName.split(" ");
-            final StringBuilder profileText = new StringBuilder();
+            final User user = new User();
 
-            for (final String word : nameWords) {
-
-                if (! word.isEmpty()) {
-                    profileText.append(Character.toUpperCase(word.charAt(0)));
-                }
-            }
-
-            userName.setText(updatedUserName);
-            userTitle.setText(updatedUserTitle);
-            profileIcon.setText(profileText);
+            userId = data.getLongExtra("User Id",0);
+            user.setName(data.getStringExtra("User Name"));
+            user.setTitle(data.getStringExtra("User Title"));
+            userName.setText(user.getName());
+            userTitle.setText(user.getTitle());
+            profileIcon.setText(user.setProfileIcon());
         }
     }
     /**
      * <p>
-     *
+     * Navigates to another activity
      * </p>
      *
-     * @param project Refers the
+     * @param project Refers the projects for intent to activity
      */
     public void goToListPage(final Project project) {
         final Intent intent = new Intent(MenuActivity.this,ProjectTodoItemActivity.class);
@@ -164,7 +175,7 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
 
     /**
      * <p>
-     *
+     * Removes the project form list
      * </p>
      *
      * @param project Refers the project for remove the list
@@ -190,10 +201,12 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
                 .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(final DialogInterface dialog, final int which) {
-                        final String name = editText.getText().toString();
+                        final String projectName = editText.getText().toString();
 
-                        menuController.onNameAdded(name, ++id, updatedUserId);
-                        arrayAdapter.notifyDataSetChanged();
+                        if (! projectName.isEmpty()) {
+                            onNameAdded(projectName);
+                            editText.setText("");
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -201,6 +214,24 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
                 .show();
     }
 
+    /**
+     * <p>
+     * Called when a new name is added to the project
+     * </p>
+     *
+     * @param projectName Refer the name to be added to the project
+     */
+    public void onNameAdded(final String projectName) {
+        if (!projectName.isEmpty()) {
+            final Project project = new Project();
+            project.setUserId(userId);
+            project.setId(++id);
+            project.setLabel(projectName);
+            projectList.add(project);
+            databaseConnection.insertProject(project);
+            arrayAdapter.notifyDataSetChanged();
+        }
+    }
 
     /**
      * <p>

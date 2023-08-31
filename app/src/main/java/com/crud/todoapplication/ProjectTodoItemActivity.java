@@ -25,7 +25,6 @@ import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.crud.todoapplication.controller.ProjectListController;
-import com.crud.todoapplication.model.Filter;
 import com.crud.todoapplication.model.TodoItem;
 import com.crud.todoapplication.model.TodoList;
 import com.crud.todoapplication.service.ProjectView;
@@ -72,8 +71,6 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
     private int currentPage = 1;
     private int pageCapacity = 10;
     private static Long id = 0L;
-    private int skip = 0;
-    private int limit = 5;
 
     /**
      * <p>
@@ -272,7 +269,20 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
                 }
             }
         });
+        final ImageButton addShowButton = findViewById(R.id.addButton);
 
+        addShowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (editText.getVisibility() == View.GONE) {
+                    editText.setVisibility(View.VISIBLE);
+                    addButton.setVisibility(View.VISIBLE);
+                } else {
+                    editText.setVisibility(View.GONE);
+                    addButton.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     private void initializeData() {
@@ -281,7 +291,6 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
         selectedProjectName = getIntent().getStringExtra("Project name");
         todoList = new TodoList();
         filter = new com.crud.todoapplication.model.Filter();
-//        todoItems = todoList.getAllItems();
 
         if (selectedProjectName != null) {
             textView.setText(selectedProjectName);
@@ -303,13 +312,11 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
 
         for (final TodoItem todoItem : todoItems) {
             if (todoItem.isChecked() && todoItem.getLabel().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
-//                addTodoItem(todoItem);
                 searchCheckedItems.add(todoItem);
             }
         }
         todoItems = searchCheckedItems;
         currentPage = 1;
-
     }
 
     /**
@@ -327,13 +334,11 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
 
         for (final TodoItem todoItem : todoItems) {
             if (!todoItem.isChecked() && todoItem.getLabel().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
-//                addTodoItem(todoItem);
                 searchUnCheckedItems.add(todoItem);
             }
         }
         todoItems = searchUnCheckedItems;
         currentPage = 1;
-
     }
 
     /**
@@ -352,12 +357,10 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
         for (final TodoItem todoItem : todoItems) {
             if (todoItem.getLabel().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
                 searchAllItems.add(todoItem);
-//                addTodoItem(todoItem);
             }
         }
         todoItems = searchAllItems;
         currentPage = 1;
-
     }
 
     /**
@@ -424,7 +427,6 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
             previousPageButton.setColorFilter(null);
             nextPageButton.setEnabled(true);
             nextPageButton.setColorFilter(null);
-
             updateTableLayout();
             updatePageNumber(pageNumber);
             saveTodoList();
@@ -448,7 +450,6 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
                         .compareToIgnoreCase(item2.getSortingValue(filter.getAttribute()));
             }
         });
-
         final int startIndex = (currentPage - 1) * pageCapacity;
         final int endIndex = Math.min(startIndex + pageCapacity, todoItems.size());
 
@@ -460,8 +461,6 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
 
     private void refreshUpdateTableLayout() {
         tableLayout.removeAllViews();
-       // todoItems = todoList.getAllItems();
-
         Collections.sort(todoItems, new Comparator<TodoItem>() {
             @Override
             public int compare(TodoItem item1, TodoItem item2) {
@@ -469,8 +468,6 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
                         .compareToIgnoreCase(item2.getSortingValue(filter.getAttribute()));
             }
         });
-
-
         final int startItem = (currentPage - 1) * pageCapacity;
         final int endItem = Math.min(startItem + pageCapacity, todoItems.size());
 
@@ -479,6 +476,7 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
             addTodoItem(todoItem);
         }
     }
+
     /**
      * <p>
      *  Updates the page number in the layout
@@ -568,26 +566,6 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
      *
      * @param todoItem Refer the Todo item to be removed
      */
-//    private void removeItem(final TableRow tableRow, final TodoItem todoItem) {
-//        tableLayout.removeView(tableRow);
-//        todoList.remove(todoItem.getId());
-//
-//
-//        int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
-//        if (currentPage > totalPageCount) {
-//            currentPage = totalPageCount;
-//        }
-//
-//        updateTableLayout();
-//        updatePageNumber(pageNumber);
-//        saveTodoList();
-//    }
-    //        todoItems = todoList.getAllItems();
-//        todoItems.size();
-    //        if (todoItems.isEmpty()) {
-//            currentPage = 0;
-//            updatePageNumber(pageNumber);
-//        }
     private void removeItem(final TableRow tableRow, final TodoItem todoItem) {
         int previousTotalPageCount = (int) Math.ceil((double) todoItems.size() / pageCapacity);
         tableLayout.removeView(tableRow);
@@ -615,9 +593,6 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
                 updateTableLayout();
             }
         }
-
         saveTodoList();
     }
-
-
 }

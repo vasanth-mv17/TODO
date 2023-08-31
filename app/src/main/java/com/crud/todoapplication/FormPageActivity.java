@@ -25,43 +25,29 @@ public class FormPageActivity extends AppCompatActivity {
     private static Long id = 0L;
     private DatabaseConnection databaseConnection;
 
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_page);
 
-        user = new User();
         databaseConnection = new DatabaseConnection(this);
-        user.setId(++id);
-
-        initializeView();
-        setProfileIcon();
-        setListeners();
-    }
-
-    private void initializeView() {
         backMenuButton = findViewById(R.id.backMenuButton);
         profileIcon = findViewById(R.id.profileIcon);
         user_name = findViewById(R.id.editTextText);
         user_title = findViewById(R.id.editTextText2);
+        user = databaseConnection.getUserProfile();
 
-        final String existingName = getIntent().getStringExtra("Name");
-        final String existingTitle = getIntent().getStringExtra("Title");
-//        user_name.setText(existingName);
-//        user_title.setText(existingTitle);
-    }
-
-    private void setProfileIcon() {
-        final String name = user_name.getText().toString();
-        final String[] nameWords = name.split(" ");
-        final StringBuilder profileText = new StringBuilder();
-
-        for (final String word : nameWords) {
-            if (!word.isEmpty()) {
-                profileText.append(Character.toUpperCase(word.charAt(0)));
-            }
+        if (null != user) {
+            user_name.setText(user.getName());
+            user_title.setText(user.getTitle());
+            profileIcon.setText(user.setProfileIcon());
+        } else {
+            user = new User();
+            user.setName(getIntent().getStringExtra("Name"));
+            user.setTitle(getIntent().getStringExtra("Title"));
         }
-        profileIcon.setText(profileText);
+        setListeners();
     }
 
     private void setListeners() {
@@ -76,22 +62,16 @@ public class FormPageActivity extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final String name = user_name.getText().toString();
-                final String title = user_title.getText().toString();
-
-                user.setId(++id);
-                user.setName(name);
-                user.setTitle(title);
-                databaseConnection.insertUser(name, title);
-
                 final Intent resultantIntent = new Intent();
-                resultantIntent.putExtra("User Id", user.getId());
+
+                user.setName(user_name.getText().toString());
+                user.setTitle(user_title.getText().toString());
+                profileIcon.setText(user.setProfileIcon());
+                Long userId = databaseConnection.insertUser(user);
+
+                user.setId(userId);
                 resultantIntent.putExtra("User Name", user.getName());
                 resultantIntent.putExtra("User Title", user.getTitle());
-
-                if (!TextUtils.isEmpty(name)) {
-                    setProfileIcon();
-                }
                 setResult(RESULT_OK, resultantIntent);
                 finish();
             }

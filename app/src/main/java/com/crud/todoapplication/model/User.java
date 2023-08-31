@@ -30,5 +30,15 @@ public class User {
         this.title = title;
     }
 
+    public StringBuilder setProfileIcon() {
+        final String[] nameWords = name.split(" ");
+        final StringBuilder profileText = new StringBuilder();
 
+        for (final String word : nameWords) {
+            if (!word.isEmpty()) {
+                profileText.append(Character.toUpperCase(word.charAt(0)));
+            }
+        }
+        return profileText;
+    }
 }
