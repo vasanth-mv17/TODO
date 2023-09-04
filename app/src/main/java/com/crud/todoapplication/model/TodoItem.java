@@ -6,10 +6,12 @@ public class TodoItem {
     private String label;
     private boolean isChecked;
     private Long parentId;
+    private Status status;
 
-    public TodoItem() {
-
-    }
+   public enum Status {
+       CHECKED,
+       UNCHECKED;
+   }
     public TodoItem(final String label) {
         this.label = label;
     }
@@ -46,18 +48,28 @@ public class TodoItem {
         return isChecked;
     }
 
+//    public void setChecked(final boolean isChecked) {
+//        this.isChecked = isChecked;
+//    }
     public void setChecked() {
-        this.isChecked = !this.isChecked;
-    }
+    this.isChecked = !this.isChecked;
+}
 
     public Long getParentId() {
         return parentId;
     }
 
-    public void setParentId(Long parentId) {
+    public void setParentId(final Long parentId) {
         this.parentId = parentId;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(final Status status) {
+        this.status = status;
+    }
     public String toString() {
         return label;
     }

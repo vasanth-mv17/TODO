@@ -44,8 +44,8 @@ public class FormPageActivity extends AppCompatActivity {
             profileIcon.setText(user.setProfileIcon());
         } else {
             user = new User();
-            user.setName(getIntent().getStringExtra("Name"));
-            user.setTitle(getIntent().getStringExtra("Title"));
+            user.setName(getIntent().getStringExtra(String.valueOf(R.string.Name)));
+            user.setTitle(getIntent().getStringExtra(String.valueOf(R.string.Title)));
         }
         setListeners();
     }
@@ -67,11 +67,12 @@ public class FormPageActivity extends AppCompatActivity {
                 user.setName(user_name.getText().toString());
                 user.setTitle(user_title.getText().toString());
                 profileIcon.setText(user.setProfileIcon());
-                Long userId = databaseConnection.insertUser(user);
+                databaseConnection.insertUser(user);
 
-                user.setId(userId);
-                resultantIntent.putExtra("User Name", user.getName());
-                resultantIntent.putExtra("User Title", user.getTitle());
+                user.setId(++id);
+                resultantIntent.putExtra(String.valueOf(R.string.Id), user.getId());
+                resultantIntent.putExtra(String.valueOf(R.string.UserName), user.getName());
+                resultantIntent.putExtra(String.valueOf(R.string.UserTitle), user.getTitle());
                 setResult(RESULT_OK, resultantIntent);
                 finish();
             }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import com.crud.todoapplication.ProjectTodoItemActivity;
+import com.crud.todoapplication.ProjectTodoItemActivity2;
 
 public class TodoList {
 
@@ -34,7 +35,10 @@ public class TodoList {
                 .collect(Collectors.toList());
     }
 
-    public List<TodoItem> getAllFilterItems(ProjectTodoItemActivity.Status status) {
+    public void setAllItems(List<TodoItem> todoItemList) {
+        todoItems.addAll(todoItemList);
+    }
+    public List<TodoItem> getAllFilterItems(ProjectTodoItemActivity2.Status status) {
         List<TodoItem> filteredItems = new ArrayList<>();
 
         switch (status) {
@@ -59,4 +63,6 @@ public class TodoList {
 
         return filteredItems.stream().skip(filter.getSkip()).limit(filter.getLimit()).collect(Collectors.toList());
     }
+
+
 }

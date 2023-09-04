@@ -1,5 +1,11 @@
 package com.crud.todoapplication.model;
 
+import com.crud.todoapplication.ProjectTodoItemActivity;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class Filter {
 
     private String searchAttribute;
@@ -38,12 +44,4 @@ public class Filter {
     public int getLimit() {
         return limit;
     }
-
-//    public void setSkip(final int skip) {
-//        this.skip = skip;
-//    }
-//
-//    public void setLimit(final int limit) {
-//        this.limit = limit;
-//    }
 }
