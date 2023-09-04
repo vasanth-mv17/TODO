@@ -5,6 +5,7 @@ public class Project {
     private Long id;
     private String label;
     private Long userId;
+    private Long order;
 
     public Long getId() {
         return id;
@@ -28,6 +29,14 @@ public class Project {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public Long getOrder() {
+        return order;
+    }
+
+    public void setOrder(final Long order) {
+        this.order = order;
     }
 
     public String toString() {

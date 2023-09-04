@@ -18,6 +18,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.crud.todoapplication.controller.MenuController;
 import com.crud.todoapplication.model.Project;
@@ -35,16 +37,17 @@ import java.util.List;
  * @author vasanth
  * @version 1.0
  */
-public class MenuActivity extends AppCompatActivity implements MenuView{
+public class MenuActivity2 extends AppCompatActivity implements MenuView{
 
     private DrawerLayout drawerLayout;
     private ListView nameListView;
     private ArrayAdapter<Project> arrayAdapter;
+    private RecyclerView recyclerView;
+    private ProjectAdapter adapter;
     private List<Project> projects;
     private ProjectList projectList;
     private ImageButton menuButton;
     private User user;
-    private MenuController menuController;
     private DatabaseConnection databaseConnection;
     private static final int REQUEST_CODE = 1;
     private TextView profileIcon;
@@ -64,23 +67,26 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_menu_list);
+        setContentView(R.layout.activity_menu2);
 
         projectList = new ProjectList();
         databaseConnection = new DatabaseConnection(this);
-        menuController = new MenuController(this, this, projectList,this);
         drawerLayout = findViewById(R.id.drawerLayout);
         menuButton = findViewById(R.id.menuButton);
-        nameListView = findViewById(R.id.nameListView);
+        recyclerView = findViewById(R.id.recyclerView);
         profileIcon = findViewById(R.id.profileIcon);
         userName = findViewById(R.id.profileName);
         userTitle = findViewById(R.id.profileTitle);
         user = databaseConnection.getUserProfile();
         projects = projectList.getAllList();
 
-        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, projects);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new ProjectAdapter(projects, MenuActivity2.this, databaseConnection);
+        androidx.recyclerview.widget.ItemTouchHelper.Callback callback = new ItemTouchHelper(adapter);
+        androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper = new androidx.recyclerview.widget.ItemTouchHelper(callback);
         loadProjectsFromDataBase();
-        nameListView.setAdapter(arrayAdapter);
+        recyclerView.setAdapter(adapter);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         if (null != user) {
             userName.setText(user.getName());
@@ -100,10 +106,10 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final Intent intent = new Intent(MenuActivity.this, FormPageActivity.class);
+                final Intent intent = new Intent(MenuActivity2.this, FormPageActivity.class);
 
-                intent.putExtra("Name", userName.getText().toString());
-                intent.putExtra("Title", userTitle.getText().toString());
+                intent.putExtra(String.valueOf(R.string.Name), userName.getText().toString());
+                intent.putExtra(String.valueOf(R.string.Title), userTitle.getText().toString());
                 startActivityIfNeeded(intent, REQUEST_CODE);
             }
         });
@@ -113,35 +119,16 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
         addList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                menuController.onAddNameClicked();
+                showAddNameDialog();
             }
         });
-        final ListView listView = findViewById(R.id.nameListView);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(final AdapterView<?> adapterView, final View view, final int indexPosition, final long l) {
-                final Project selectedProject = projectList.getAllList().get(indexPosition);
-                menuController.onListItemClicked(selectedProject);
-            }
-        });
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(final AdapterView<?> adapterView, final View view, final int i, final long l) {
-                final Project selectedProject = projectList.getAllList().get(i);
-                menuController.onListItemLongClicked(selectedProject);
-                return true;
-            }
-        });
-
     }
 
     private void loadProjectsFromDataBase() {
         projects = databaseConnection.getAllProjectList();
 
-        arrayAdapter.clear();
-        arrayAdapter.addAll(projects);
-        arrayAdapter.notifyDataSetChanged();
+        adapter.clearProjects();
+        adapter.addProjects(projects);
     }
 
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
@@ -150,9 +137,9 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             final User user = new User();
 
-            userId = data.getLongExtra("Id",0);
-            user.setName(data.getStringExtra("User Name"));
-            user.setTitle(data.getStringExtra("User Title"));
+            userId = data.getLongExtra(String.valueOf(R.string.Id),0);
+            user.setName(data.getStringExtra(String.valueOf(R.string.UserName)));
+            user.setTitle(data.getStringExtra(String.valueOf(R.string.UserTitle)));
             userName.setText(user.getName());
             userTitle.setText(user.getTitle());
             profileIcon.setText(user.setProfileIcon());
@@ -166,10 +153,10 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
      * @param project Refers the projects for intent to activity
      */
     public void goToListPage(final Project project) {
-        final Intent intent = new Intent(MenuActivity.this,ProjectTodoItemActivity.class);
+        final Intent intent = new Intent(MenuActivity2.this,ProjectTodoItemActivity.class);
 
-        intent.putExtra("Project Id", project.getId());
-        intent.putExtra("Project name", project.getLabel());
+        intent.putExtra(String.valueOf(R.string.ProjectId), project.getId());
+        intent.putExtra(String.valueOf(R.string.ProjectName), project.getLabel());
         startActivity(intent);
     }
 
@@ -196,20 +183,29 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
 
         editText.setInputType(InputType.TYPE_CLASS_TEXT);
         new AlertDialog.Builder(this)
-                .setTitle("Add List Name")
+                .setTitle(R.string.addList)
                 .setView(editText)
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(final DialogInterface dialog, final int which) {
                         final String projectName = editText.getText().toString();
 
                         if (! projectName.isEmpty()) {
-                            onNameAdded(projectName);
-                            editText.setText("");
+                            final Project project = new Project();
+                            project.setUserId(userId);
+                            project.setId(++id);
+                            project.setLabel(projectName);
+                            final long projectOrder = adapter.getItemCount()+1;
+
+                            project.setOrder(projectOrder);
+                            projectList.add(project);
+                            databaseConnection.insertProject(project);
+                            adapter.notifyDataSetChanged();
+
                         }
                     }
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.cancel, null)
                 .create()
                 .show();
     }

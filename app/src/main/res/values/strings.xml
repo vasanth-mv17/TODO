@@ -1,9 +1,9 @@
 <resources>
 
     <string-array name="filter_options">
-        <item>All</item>
-        <item>Checked</item>
-        <item>Not Checked</item>
+        <item>ALL</item>
+        <item>CHECKED</item>
+        <item>UNCHECKED</item>
     </string-array>
 
     <string-array name="page_options">
@@ -30,8 +30,21 @@
     <string name="u">U</string>
     <string name="enter_your_name">Enter Your Name</string>
     <string name="enter_your_title">Enter Your Title</string>
-    <string name="name">Name</string>
     <string name="title">Title</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
+    <string name="Name">Name</string>
+    <string name="Title">Title</string>
+    <string name="Id">Id</string>
+    <string name="UserName">User Name</string>
+    <string name="UserTitle">UserTitle</string>
+    <string name="ProjectId"></string>
+    <string name="ProjectName"></string>
+    <string name="project">project</string>
+    <string name="users">users</string>
+    <string name="id">id</string>
+    <string name="name">name</string>
+
+
+
 </resources>
