@@ -1,4 +1,19 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Base.Theme.TodoApplication" parent="Theme.Material3.DayNight.NoActionBar">
     </style>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:fontFamily">@font/alata</item>
+    </style>
+
+    <style name="Green" parent="Theme.AppCompat.Light.DarkActionBar" >
+        <item name="colorPrimary">@color/Primary</item>
+        <item name="android:windowBackground">@color/Primary</item>
+    </style>
+
+    <style name="Purple" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorSecondary">@color/Secondary</item>
+        <item name="android:windowBackground">@color/Secondary</item>
+
+    </style>
 </resources>

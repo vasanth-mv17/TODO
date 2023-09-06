@@ -3,6 +3,7 @@ package com.crud.todoapplication;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +49,9 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TodoItem todoItem = todoItems.get(position);
+        Typeface typeface = FontManager.getCurrentTypeface();
         //holder.bind(todoItem,listener);
+        holder.itemText.setTypeface(typeface);
         holder.bind(todoItem, databaseConnection);
 
         holder.removeButton.setOnClickListener(v -> {

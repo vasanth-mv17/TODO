@@ -19,8 +19,8 @@ public class FormPageActivity extends AppCompatActivity {
     private EditText user_name;
     private EditText user_title;
     private TextView profileIcon;
-    private Button saveButton;
-    private Button cancelButton;
+    private ImageButton saveButton;
+    private ImageButton cancelButton;
     private User user;
     private static Long id = 0L;
     private DatabaseConnection databaseConnection;
@@ -29,6 +29,7 @@ public class FormPageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        int currentTheme = FontManager.getCurrentColour();
         setContentView(R.layout.activity_form_page);
 
         databaseConnection = new DatabaseConnection(this);
@@ -47,7 +48,52 @@ public class FormPageActivity extends AppCompatActivity {
             user.setName(getIntent().getStringExtra(String.valueOf(R.string.Name)));
             user.setTitle(getIntent().getStringExtra(String.valueOf(R.string.Title)));
         }
-        setListeners();
+
+        backMenuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+        saveButton = findViewById(R.id.save_button);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Intent resultantIntent = new Intent();
+
+                user.setName(user_name.getText().toString());
+                user.setTitle(user_title.getText().toString());
+                profileIcon.setText(user.setProfileIcon());
+                databaseConnection.insertUser(user);
+
+                user.setId(++id);
+                resultantIntent.putExtra(String.valueOf(R.string.Id), user.getId());
+                resultantIntent.putExtra(String.valueOf(R.string.UserName), user.getName());
+                resultantIntent.putExtra(String.valueOf(R.string.UserTitle), user.getTitle());
+                setResult(RESULT_OK, resultantIntent);
+                finish();
+            }
+        });
+
+        cancelButton = findViewById(R.id.cancel_button);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+        if (currentTheme == R.color.Primary) {
+            saveButton.setBackgroundColor(getResources().getColor(R.color.Primary));
+            cancelButton.setBackgroundColor(getResources().getColor(R.color.Primary));
+        } else if (currentTheme == R.color.Secondary) {
+            saveButton.setBackgroundColor(getResources().getColor(R.color.Secondary));
+            cancelButton.setBackgroundColor(getResources().getColor(R.color.Secondary));
+        }
+
+        applyFontToAllLayout();
+        applyTextSizeToTextViews();
     }
 
     private void setListeners() {
@@ -85,5 +131,15 @@ public class FormPageActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
+
+        applyFontToAllLayout();
+        applyTextSizeToTextViews();
+    }
+
+    public void applyFontToAllLayout() {
+        FontManager.applyFontToView(this, getWindow().getDecorView().findViewById(android.R.id.content));
+    }
+    private void applyTextSizeToTextViews() {
+        FontManager.applyTextSizeToView(findViewById(android.R.id.content).getRootView());
     }
 }

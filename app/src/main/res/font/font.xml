@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <font app:fontStyle="normal"
+        app:font="@font/telex"/>
+
+    <font app:fontStyle="normal"
+        app:font="@font/alata"/>
+
+    <font app:fontStyle="normal"
+        app:font="@font/amaranth_bold"/>
+
+    <font app:fontStyle="normal"
+        app:font="@font/anton"/>
+
+    <font app:fontStyle="normal"
+        app:font="@font/karla"/>
+
+    <font app:fontStyle="normal"
+        android:fontWeight="600"
+        app:font="@font/belleza"/>
+
+</font-family>

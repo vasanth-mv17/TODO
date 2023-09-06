@@ -14,6 +14,23 @@
         <item>50</item>
     </string-array>
 
+    <string-array name="font_family">
+        <item>Default</item>
+        <item>Alata</item>
+        <item>Amaranth</item>
+        <item>Anton</item>
+        <item>Telex</item>
+    </string-array>
+    <string-array name="font_size">
+        <item>Large</item>
+        <item>Medium</item>
+        <item>Small</item>
+    </string-array>
+    <string-array name="theme">
+        <item>Default(Green)</item>
+        <item>Purple</item>
+    </string-array>
+
     <string name="TodoApplication">Todo Application</string>
     <string name="TodoLists">Todo Lists</string>
     <string name="addList">Add List</string>
@@ -44,7 +61,7 @@
     <string name="users">users</string>
     <string name="id">id</string>
     <string name="name">name</string>
-
+    <string name="enter_list">Enter List</string>
 
 
 </resources>

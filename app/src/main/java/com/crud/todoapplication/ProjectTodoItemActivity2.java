@@ -15,6 +15,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -62,7 +63,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     private ImageButton previousPageButton;
     private ImageButton nextPageButton;
     private ImageButton filterButton;
-    private Button addButton;
+    private ImageButton addButton;
 
     private String selectedProjectName;
     private Long selectedProjectId;
@@ -91,6 +92,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        int currentTheme = FontManager.getCurrentColour();
         setContentView(R.layout.activity_sub2);
 
         drawerLayout = findViewById(R.id.drawerLayout);
@@ -106,6 +108,8 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         editText = findViewById(R.id.todoEditText);
         pageNumber = findViewById(R.id.pageCount);
         textView = findViewById(R.id.listName);
+        final RelativeLayout toolbar = findViewById(R.id.toolbar);
+        final RelativeLayout toolBar = findViewById(R.id.bottom_toolbar);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -128,6 +132,17 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         checkedItems = new ArrayList<>();
         unCheckedItems = new ArrayList<>();
         allItems = new ArrayList<>();
+
+        if (currentTheme == R.color.Primary) {
+           toolbar.setBackgroundColor(getResources().getColor(R.color.Primary));
+           addButton.setBackgroundColor(getResources().getColor(R.color.Primary));
+           toolBar.setBackgroundColor(getResources().getColor(R.color.Primary));
+        } else if (currentTheme == R.color.Secondary) {
+            toolbar.setBackgroundColor(getResources().getColor(R.color.Secondary));
+            addButton.setBackgroundColor(getResources().getColor(R.color.Secondary));
+            toolBar.setBackgroundColor(getResources().getColor(R.color.Secondary));
+        }
+
 
         if (selectedProjectName != null) {
             textView.setText(selectedProjectName);
@@ -276,6 +291,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             }
         });
         final ImageButton addShowButton = findViewById(R.id.addButton);
+        final TextView addTextView = findViewById(R.id.addTodoItem);
 
         addShowButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -283,14 +299,20 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
                 if (editText.getVisibility() == View.GONE) {
                     editText.setVisibility(View.VISIBLE);
                     addButton.setVisibility(View.VISIBLE);
+                    addTextView.setVisibility(View.VISIBLE);
                 } else {
                     editText.setVisibility(View.GONE);
                     addButton.setVisibility(View.GONE);
+                    addTextView.setVisibility(View.GONE);
                 }
             }
         });
+        applyFontToAllLayout();
     }
 
+    public void applyFontToAllLayout() {
+        FontManager.applyFontToView(this, getWindow().getDecorView().findViewById(android.R.id.content));
+    }
     /**
      * <p>
      * Enum for filter content

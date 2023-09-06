@@ -3,6 +3,7 @@ package com.crud.todoapplication;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,11 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         final Project project = projects.get(position);
+        Typeface typeface = FontManager.getCurrentTypeface();
+        float textSize = FontManager.getCurrentFontSize();
+
+        holder.projectNameTextView.setTextSize(textSize);
+        holder.projectNameTextView.setTypeface(typeface);
         holder.projectNameTextView.setText(project.getLabel());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
