@@ -5,6 +5,7 @@ public class Credentials {
     private Long id;
     private String name;
     private String email;
+    private String Title;
     private String password;
     private String confirmPassword;
 
@@ -30,6 +31,14 @@ public class Credentials {
 
     public void setEmail(final String email) {
         this.email = email;
+    }
+
+    public String getTitle() {
+        return Title;
+    }
+
+    public void setTitle(final String title) {
+        Title = title;
     }
 
     public String getPassword() {

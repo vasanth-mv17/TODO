@@ -95,7 +95,6 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
         public void bind(final TodoItem todoItem, final DatabaseConnection databaseConnection) {
             itemText.setText(todoItem.getLabel());
             checkBox.setChecked(todoItem.getStatus() == TodoItem.Status.CHECKED);
-            checkBox.setButtonDrawable(R.color.Primary);
             itemText.setTextColor(todoItem.getStatus() == TodoItem.Status.CHECKED ? Color.GRAY : Color.BLACK);
 
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

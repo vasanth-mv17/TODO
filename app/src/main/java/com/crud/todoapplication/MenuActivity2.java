@@ -27,11 +27,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.crud.todoapplication.controller.MenuController;
+import com.crud.todoapplication.model.Credentials;
 import com.crud.todoapplication.model.Project;
 import com.crud.todoapplication.model.ProjectList;
 import com.crud.todoapplication.model.User;
 import com.crud.todoapplication.service.MenuView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,8 +47,7 @@ import java.util.List;
 public class MenuActivity2 extends AppCompatActivity implements MenuView{
 
     private DrawerLayout drawerLayout;
-    private ListView nameListView;
-    private ArrayAdapter<Project> arrayAdapter;
+    private Credentials userCredentials;
     private RecyclerView recyclerView;
     private ProjectAdapter adapter;
     private List<Project> projects;
@@ -84,22 +85,39 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView{
         profileIcon = findViewById(R.id.profileIcon);
         userName = findViewById(R.id.profileName);
         userTitle = findViewById(R.id.profileTitle);
-        user = databaseConnection.getUserProfile();
+//        user = databaseConnection.getUserProfile();
+        user = new User();
         projects = projectList.getAllList();
-
+        userCredentials  = new Credentials();
+        Intent intent = getIntent();
+        String Email = intent.getStringExtra("email");
+        final User user = databaseConnection.getUserById(Email);
+        userId = user.getId();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ProjectAdapter(projects, MenuActivity2.this, databaseConnection);
         androidx.recyclerview.widget.ItemTouchHelper.Callback callback = new ItemTouchHelper(adapter);
         androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper = new androidx.recyclerview.widget.ItemTouchHelper(callback);
-        loadProjectsFromDataBase();
+        loadProjectsFromDataBase(userId);
         recyclerView.setAdapter(adapter);
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
+
+        if (userName != null && userTitle != null) {
+            user.setId(userId);
+            user.setName(user.getName());
+            user.setTitle(user.getTitle());
+            user.setEmail(Email);
+            databaseConnection.updateUser(user);
+
+        }
+
         if (null != user) {
+//            userName.setText(getIntent().getStringExtra(userCredentials.getName()));
             userName.setText(user.getName());
             userTitle.setText(user.getTitle());
             profileIcon.setText(user.setProfileIcon());
             userId = user.getId();
+
         }
 
         menuButton.setOnClickListener(new View.OnClickListener() {
@@ -131,8 +149,12 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView{
                 if (!projectLabel.isEmpty()) {
                     final Project project = new Project();
 
+                    project.setUserId(userId);
                     project.setId(++id);
                     project.setLabel(projectLabel);
+                    final long projectOrder = adapter.getItemCount()+1;
+
+                    project.setOrder(projectOrder);
                     projectList.add(project);
                     databaseConnection.insertProject(project);
                     addListItem.getText().clear();
@@ -293,11 +315,17 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView{
         return typeface;
     }
 
-    private void loadProjectsFromDataBase() {
+    private void loadProjectsFromDataBase(final Long userId) {
         projects = databaseConnection.getAllProjectList();
+        List<Project> filterProject = new ArrayList<>();
 
+        for (Project project : projects) {
+            if (project.getUserId().equals(userId)) {
+                filterProject.add(project);
+            }
+        }
         adapter.clearProjects();
-        adapter.addProjects(projects);
+        adapter.addProjects(filterProject);
     }
 
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
@@ -310,6 +338,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView{
             user.setName(data.getStringExtra(String.valueOf(R.string.UserName)));
             user.setTitle(data.getStringExtra(String.valueOf(R.string.UserTitle)));
             userName.setText(user.getName());
+//            userName.setText(userCredentials.getName());
             userTitle.setText(user.getTitle());
             profileIcon.setText(user.setProfileIcon());
         }
@@ -329,17 +358,6 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView{
         startActivity(intent);
     }
 
-    /**
-     * <p>
-     * Removes the project form list
-     * </p>
-     *
-     * @param project Refers the project for remove the list
-     */
-    public void removeProjectFromList(final Project project) {
-        arrayAdapter.remove(project);
-        arrayAdapter.notifyDataSetChanged();
-    }
 
     /**
      * <p>
@@ -379,24 +397,6 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView{
                 .show();
     }
 
-    /**
-     * <p>
-     * Called when a new name is added to the project
-     * </p>
-     *
-     * @param projectName Refer the name to be added to the project
-     */
-    public void onNameAdded(final String projectName) {
-        if (!projectName.isEmpty()) {
-            final Project project = new Project();
-            project.setUserId(userId);
-            project.setId(++id);
-            project.setLabel(projectName);
-            projectList.add(project);
-            databaseConnection.insertProject(project);
-            arrayAdapter.notifyDataSetChanged();
-        }
-    }
 
     /**
      * <p>

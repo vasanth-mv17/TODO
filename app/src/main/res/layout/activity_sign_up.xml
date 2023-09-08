@@ -21,20 +21,22 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.074" />
 
+
     <EditText
         android:id="@+id/sign_up_name"
         android:layout_width="307dp"
         android:layout_height="56dp"
         android:background="@drawable/rounded_textbox"
         android:drawablePadding="10dp"
-        android:hint="Name"
-        android:paddingLeft="15dp"
+        android:hint="@string/Name"
         android:includeFontPadding="true"
+        android:paddingLeft="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.538"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.273"
+        app:layout_constraintVertical_bias="0.277"
         tools:ignore="MissingConstraints" />
 
     <EditText
@@ -42,19 +44,53 @@
         android:layout_width="307dp"
         android:layout_height="56dp"
         android:background="@drawable/rounded_textbox"
-        android:hint="Confirm Password"
-        android:paddingLeft="15dp"
-        android:drawableRight="@drawable/baseline_visibility_off_24"
         android:drawablePadding="10sp"
+        android:hint="@string/confirm_password"
+        android:inputType="textPassword"
+        android:paddingLeft="15dp"
         android:paddingRight="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.538"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.64"
-        tools:ignore="MissingConstraints"
-        android:inputType="textPassword"/>
+        app:layout_constraintVertical_bias="0.749"
+        tools:ignore="MissingConstraints" />
 
+    <ImageView
+        android:id="@+id/visibility_confirm"
+        android:layout_width="45dp"
+        android:layout_height="51dp"
+        android:layout_alignEnd="@+id/sign_up_pass"
+        android:layout_alignBottom="@+id/sign_up_pass"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="10dp"
+        android:src="@drawable/baseline_visibility_off_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.868"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.744"
+        tools:ignore="MissingConstraints" />
+
+    <EditText
+        android:id="@+id/sign_up_tile"
+        android:layout_width="307dp"
+        android:layout_height="56dp"
+        android:background="@drawable/rounded_textbox"
+        android:drawablePadding="10sp"
+        android:hint="@string/Title"
+        android:paddingLeft="15dp"
+        android:paddingRight="10sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.538"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.518"
+        tools:ignore="MissingConstraints" />
 
     <EditText
         android:id="@+id/sign_up_pass"
@@ -67,12 +103,14 @@
         android:paddingRight="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.538"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.522"
+        app:layout_constraintVertical_bias="0.634"
         tools:ignore="MissingConstraints" />
 
     <ImageView
+        android:id="@+id/visible_icon"
         android:layout_width="45dp"
         android:layout_height="51dp"
         android:layout_alignEnd="@+id/sign_up_pass"
@@ -86,7 +124,7 @@
         app:layout_constraintHorizontal_bias="0.866"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.519"
+        app:layout_constraintVertical_bias="0.629"
         tools:ignore="MissingConstraints" />
 
     <EditText
@@ -98,9 +136,10 @@
         android:paddingLeft="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.528"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.396"
+        app:layout_constraintVertical_bias="0.398"
         tools:ignore="MissingConstraints" />
 
     <Button
@@ -112,9 +151,10 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.571"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.803" />
+        app:layout_constraintVertical_bias="0.866" />
 
     <TextView
         android:id="@+id/already_account"
@@ -126,7 +166,7 @@
         app:layout_constraintEnd_toEndOf="@+id/register_button"
         app:layout_constraintStart_toStartOf="@+id/register_button"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.873"
+        app:layout_constraintVertical_bias="0.915"
         tools:ignore="MissingConstraints" />
 
     <TextView

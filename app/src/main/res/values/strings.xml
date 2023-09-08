@@ -62,6 +62,7 @@
     <string name="id">id</string>
     <string name="name">name</string>
     <string name="enter_list">Enter List</string>
+    <string name="confirm_password">Confirm Password</string>
 
 
 </resources>
