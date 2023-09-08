@@ -2,6 +2,7 @@ package com.crud.todoapplication;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
@@ -94,6 +95,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
         public void bind(final TodoItem todoItem, final DatabaseConnection databaseConnection) {
             itemText.setText(todoItem.getLabel());
             checkBox.setChecked(todoItem.getStatus() == TodoItem.Status.CHECKED);
+            checkBox.setButtonDrawable(R.color.Primary);
             itemText.setTextColor(todoItem.getStatus() == TodoItem.Status.CHECKED ? Color.GRAY : Color.BLACK);
 
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
