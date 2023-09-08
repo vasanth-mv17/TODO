@@ -63,6 +63,16 @@
             android:background="@color/Primary"
             android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
+            <ImageView
+                android:id="@+id/logout"
+                android:layout_width="25dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="@dimen/size"
+                android:layout_gravity="end"
+                android:src="@drawable/baseline_logout_24">
+
+            </ImageView>
+
             <TextView
                 android:id="@+id/profileIcon"
                 android:layout_width="64dp"

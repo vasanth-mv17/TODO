@@ -96,46 +96,6 @@ public class FormPageActivity extends AppCompatActivity {
         applyTextSizeToTextViews();
     }
 
-    private void setListeners() {
-        backMenuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
-
-        saveButton = findViewById(R.id.save_button);
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final Intent resultantIntent = new Intent();
-
-                user.setName(user_name.getText().toString());
-                user.setTitle(user_title.getText().toString());
-                profileIcon.setText(user.setProfileIcon());
-                databaseConnection.insertUser(user);
-
-                user.setId(++id);
-                resultantIntent.putExtra(String.valueOf(R.string.Id), user.getId());
-                resultantIntent.putExtra(String.valueOf(R.string.UserName), user.getName());
-                resultantIntent.putExtra(String.valueOf(R.string.UserTitle), user.getTitle());
-                setResult(RESULT_OK, resultantIntent);
-                finish();
-            }
-        });
-
-        cancelButton = findViewById(R.id.cancel_button);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
-
-        applyFontToAllLayout();
-        applyTextSizeToTextViews();
-    }
-
     public void applyFontToAllLayout() {
         FontManager.applyFontToView(this, getWindow().getDecorView().findViewById(android.R.id.content));
     }

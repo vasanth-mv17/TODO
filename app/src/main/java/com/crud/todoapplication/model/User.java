@@ -3,6 +3,7 @@ package com.crud.todoapplication.model;
 public class User {
 
     private Long id;
+    private String email;
     private String name;
     private String title;
 
@@ -20,6 +21,14 @@ public class User {
 
     public void setName(final String name) {
         this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(final String email) {
+        this.email = email;
     }
 
     public String getTitle() {

@@ -3,6 +3,8 @@ package com.crud.todoapplication;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
+
+import com.crud.todoapplication.model.Credentials;
 import com.crud.todoapplication.model.Project;
 import com.crud.todoapplication.model.TodoItem;
 import com.crud.todoapplication.model.User;
@@ -13,7 +15,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class DatabaseConnection extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "project";
@@ -23,6 +24,12 @@ public class DatabaseConnection extends SQLiteOpenHelper {
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_TITLE = "title";
+
+    public static final String TABLE_SIGN_UP = "signup";
+    public static final String ID = "id";
+    public static final String NAME = "name";
+    public static final String EMAIL = "email";
+    public static final String PASSWORD = "password";
 
     private static final String TABLE_PROJECTS = "projects";
     private static final String COLUMN_PROJECT_ID = "project_id";
@@ -39,6 +46,15 @@ public class DatabaseConnection extends SQLiteOpenHelper {
     private static final String COLUMN_COMPLETED = "CHECKED";
     private static final String COLUMN_UNCOMPLETED = "UNCHECKED";
 
+
+    private static final String CREATE_TABLE_SIGN_UP = String.format(
+            "CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT, %s TEXT)",
+            TABLE_SIGN_UP,
+            ID,
+            NAME,
+            EMAIL,
+            PASSWORD
+    );
 
     private static final String CREATE_TABLE_USERS = String.format(
             "CREATE TABLE %s (%s INTEGER PRIMARY KEY, %s TEXT, %s TEXT)",
@@ -61,7 +77,6 @@ public class DatabaseConnection extends SQLiteOpenHelper {
             COLUMN_ID
     );
 
-
     private static final String CREATE_TABLE_TODO = "CREATE TABLE " + TABLE_TODO + " (" +
             COLUMN_TODO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             COLUMN_LABEL + " TEXT NOT NULL," +
@@ -83,6 +98,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      */
     @Override
     public void onCreate(final SQLiteDatabase db) {
+        db.execSQL(CREATE_TABLE_SIGN_UP);
         db.execSQL(CREATE_TABLE_TODO);
         db.execSQL(CREATE_TABLE_PROJECTS);
         db.execSQL(CREATE_TABLE_USERS);
@@ -99,10 +115,111 @@ public class DatabaseConnection extends SQLiteOpenHelper {
      */
     @Override
     public void onUpgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SIGN_UP);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROJECTS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TODO);
         onCreate(db);
+    }
+
+    public Boolean insertData(final Credentials userCredentials) {
+        final SQLiteDatabase db = this.getWritableDatabase();
+        final ContentValues values = new ContentValues();
+
+        values.put(NAME, userCredentials.getName());
+        values.put(EMAIL, userCredentials.getEmail());
+        values.put(PASSWORD, userCredentials.getPassword());
+
+        long result = db.insert(TABLE_SIGN_UP, null, values);
+        if (result == -1) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public Boolean checkUserEmail(String email) {
+        final SQLiteDatabase db = this.getWritableDatabase();
+        final Cursor cursor = db.query(
+                TABLE_SIGN_UP,
+                null,
+                EMAIL + "=?",
+                new String[] { email },
+                null,
+                null,
+                null
+        );
+        if (cursor.getCount()>0)
+            return true;
+        else
+            return false;
+    }
+
+    public int updatePassword(final String email, final String newPassword) {
+        final SQLiteDatabase sqLiteDatabase = getWritableDatabase();
+        final ContentValues values = new ContentValues();
+
+        values.put(PASSWORD, newPassword);
+
+        final String whereClause = EMAIL + " = ?";
+        final String[] whereArgs = { email };
+
+        return sqLiteDatabase.update(TABLE_SIGN_UP, values, whereClause, whereArgs);
+
+    }
+
+    public Boolean checkUserSignUpEmail(final Credentials userCredentials) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        final Cursor cursor = db.query(
+                TABLE_SIGN_UP,
+                null,
+                EMAIL + "=?",
+                new String[] {userCredentials.getEmail() },
+                null,
+                null,
+                null
+        );
+        if (cursor.getCount()>0)
+            return true;
+        else
+            return false;
+    }
+
+    public Boolean checkUserName(final Credentials userCredentials) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        final Cursor cursor = db.query(
+                TABLE_SIGN_UP,
+                null,
+                NAME + "=?",
+                new String[] {userCredentials.getName() },
+                null,
+                null,
+                null
+        );
+        if (cursor.getCount()>0)
+            return true;
+        else
+            return false;
+    }
+
+    public Boolean checkUserNameAndPassword(final String email, final String password) {
+        final SQLiteDatabase db = this.getWritableDatabase();
+        final String selection = EMAIL + "= ? AND " + PASSWORD + "= ?";
+        final String[] selectionArgs = new String[] { email, password};
+
+        final Cursor cursor = db.query(
+                TABLE_SIGN_UP,
+                null,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+        );
+        if (cursor.getCount()>0)
+            return true;
+        else
+            return false;
     }
 
     /**
