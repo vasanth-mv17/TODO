@@ -71,16 +71,25 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
     }
 
     public void onItemMove(final int fromPosition, final int toPosition) {
-        if (fromPosition < toPosition) {
-            for (int i = fromPosition; i < toPosition; i++) {
-                Collections.swap(projects, i, i + 1);
-            }
-        } else {
-            for (int i = fromPosition; i > toPosition; i--) {
-                Collections.swap(projects, i, i - 1);
-            }
-        }
+//        if (fromPosition < toPosition) {
+//            for (int i = fromPosition; i < toPosition; i++) {
+//                Collections.swap(projects, i, i + 1);
+//            }
+//        } else {
+//            for (int i = fromPosition; i > toPosition; i--) {
+//                Collections.swap(projects, i, i - 1);
+//            }
+//        }
+//        notifyItemMoved(fromPosition, toPosition);
+        final Project fromProject = projects.get(fromPosition);
+        final Project toProject = projects.get(toPosition);
+
+        Collections.swap(projects, fromPosition, toPosition);
+        fromProject.setOrder((long) (toPosition + 1));
+        toProject.setOrder((long) fromPosition + 1);
         notifyItemMoved(fromPosition, toPosition);
+        databaseConnection.updateProjectsOrder(fromProject);
+        databaseConnection.updateProjectsOrder(toProject);
     }
 
     @SuppressLint("NotifyDataSetChanged")

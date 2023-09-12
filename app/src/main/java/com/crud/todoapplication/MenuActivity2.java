@@ -142,6 +142,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView{
         final EditText addListItem = findViewById(R.id.addListItem);
         final ImageButton addList = findViewById(R.id.addList);
         addList.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onClick(View view) {
                 final String projectLabel = addListItem.getText().toString();
@@ -157,6 +158,8 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView{
                     project.setOrder(projectOrder);
                     projectList.add(project);
                     databaseConnection.insertProject(project);
+                    adapter.notifyDataSetChanged();
+
                     addListItem.getText().clear();
                 }
             }

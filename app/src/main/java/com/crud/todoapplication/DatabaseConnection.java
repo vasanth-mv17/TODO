@@ -47,6 +47,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
     private static final String COLUMN_STATUS = "status";
     private static final String COLUMN_COMPLETED = "CHECKED";
     private static final String COLUMN_UNCOMPLETED = "UNCHECKED";
+    private static final String COLUMN_TODO_ORDER = "order_type";
 
 
     private static final String CREATE_TABLE_SIGN_UP = String.format(
@@ -85,6 +86,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
             COLUMN_TODO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             COLUMN_LABEL + " TEXT NOT NULL," +
             COLUMN_project_ID + " INTEGER NOT NULL," +
+            COLUMN_TODO_ORDER + " INTEGER NOT NULL," +
             COLUMN_STATUS + " TEXT CHECK (" + COLUMN_STATUS + " IN ('" + COLUMN_COMPLETED + "', '" + COLUMN_UNCOMPLETED + "'))," +
             "FOREIGN KEY (" + COLUMN_project_ID + ") REFERENCES " + TABLE_PROJECTS + "(" + COLUMN_PROJECT_ID + ")" +
             ")";
@@ -313,6 +315,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
 
         values.put(COLUMN_LABEL, todoItem.getLabel());
         values.put(COLUMN_project_ID, todoItem.getParentId());
+        values.put(COLUMN_TODO_ORDER, todoItem.getOrder());
         values.put(COLUMN_STATUS, String.valueOf(todoItem.getStatus()));
 
         return db.insert(TABLE_TODO, null, values);
@@ -399,7 +402,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
 
         try (final Cursor cursor = sqLiteDatabase.query(TABLE_TODO, null,
                 String.format("%s = ?", COLUMN_project_ID), new String[]{String.valueOf(projectId)},
-                null, null, null)) {
+                null, null, COLUMN_TODO_ORDER)) {
 
             if (null != cursor && cursor.moveToFirst()) {
                 do {
@@ -434,7 +437,16 @@ public class DatabaseConnection extends SQLiteOpenHelper {
 
         values.put(COLUMN_ORDER, project.getOrder());
         sqLiteDatabase.update(TABLE_PROJECTS, values, String.format("%s = ?",
-                COLUMN_ID), new String[]{String.valueOf(project.getId())});
+                COLUMN_PROJECT_ID), new String[]{String.valueOf(project.getId())});
+    }
+
+    public void updateTodoOrder(final TodoItem todoItem) {
+        final SQLiteDatabase sqLiteDatabase = getWritableDatabase();
+        final ContentValues values = new ContentValues();
+
+        values.put(COLUMN_TODO_ORDER, todoItem.getOrder());
+        sqLiteDatabase.update(TABLE_TODO, values, String.format("%s = ?",
+                COLUMN_TODO_ID), new String[]{String.valueOf(todoItem.getId())});
     }
 }
 
