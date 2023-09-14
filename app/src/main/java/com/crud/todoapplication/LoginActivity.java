@@ -1,5 +1,6 @@
 package com.crud.todoapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -14,12 +15,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crud.todoapplication.api.ApiClient;
+import com.crud.todoapplication.api.ApiService;
 import com.crud.todoapplication.model.User;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.security.MessageDigest;
 import java.security.MessageDigestSpi;
 import java.security.NoSuchAlgorithmException;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -75,23 +83,34 @@ public class LoginActivity extends AppCompatActivity {
                      showSnackBar("All Fields are Required");
                  } else {
                      final String hashPassword = MD5Helper.md5(pass);
-//                     final String hashPassword;
-//                     try {
-//                         hashPassword = String.valueOf(MessageDigest.getInstance(pass));
-//                     } catch (NoSuchAlgorithmException e) {
-//                         throw new RuntimeException(e);
-//                     }
-//                     System.out.println(hashPassword);
-                     final Boolean checkUserPass = databaseConnection.checkUserNameAndPassword(email, hashPassword);
 
-                     if (checkUserPass) {
-                         showSnackBar("Login Successfully");
-                         final Intent intent = new Intent(LoginActivity.this, MenuActivity2.class);
-                         intent.putExtra("email", email);
-                         startActivity(intent);
-                     } else {
-                         showSnackBar("Login Failed");
-                     }
+                     ApiService apiService = ApiClient.getApiService("http://192.168.1.29:8080/");
+                     Call<ResponseBody> call = apiService.loginUser(email, hashPassword);
+
+                     call.enqueue(new Callback<ResponseBody>() {
+                         @Override
+                         public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                             if (response.isSuccessful()) {
+                                 showSnackBar("Login Success");
+
+                             } else {
+                                 showSnackBar("Login failed");
+                             }
+                         }
+
+                         @Override
+                         public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                                showSnackBar("Network Error: "+ t.getMessage());
+                         }
+                     });
+//                     if (checkUserPass) {
+//                         showSnackBar("Login Successfully");
+//                         final Intent intent = new Intent(LoginActivity.this, MenuActivity2.class);
+//                         intent.putExtra("email", email);
+//                         startActivity(intent);
+//                     } else {
+//                         showSnackBar("Login Failed");
+//                     }
                  }
              }
          });

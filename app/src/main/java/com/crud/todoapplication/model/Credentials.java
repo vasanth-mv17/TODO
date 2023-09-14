@@ -3,11 +3,10 @@ package com.crud.todoapplication.model;
 public class Credentials {
 
     private Long id;
-    private String name;
     private String email;
-    private String Title;
     private String password;
-    private String confirmPassword;
+    private String hint;
+    private String conformPassword;
 
     public Long getId() {
         return id;
@@ -15,14 +14,6 @@ public class Credentials {
 
     public void setId(final Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
     }
 
     public String getEmail() {
@@ -33,14 +24,6 @@ public class Credentials {
         this.email = email;
     }
 
-    public String getTitle() {
-        return Title;
-    }
-
-    public void setTitle(final String title) {
-        Title = title;
-    }
-
     public String getPassword() {
         return password;
     }
@@ -49,11 +32,19 @@ public class Credentials {
         this.password = password;
     }
 
-    public String getConfirmPassword() {
-        return confirmPassword;
+    public String getHint() {
+        return hint;
     }
 
-    public void setConfirmPassword(final String confirmPassword) {
-        this.confirmPassword = confirmPassword;
+    public void setHint(final String hint) {
+        this.hint = hint;
+    }
+
+    public String getConformPassword() {
+        return conformPassword;
+    }
+
+    public void setConformPassword(final String conformPassword) {
+        this.conformPassword = conformPassword;
     }
 }

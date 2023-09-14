@@ -31,6 +31,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
     public static final String NAME = "name";
     public static final String EMAIL = "email";
     public static final String TITLE = "title";
+    public static final String HINT = "hint";
     public static final String PASSWORD = "password";
 
     private static final String TABLE_PROJECTS = "projects";
@@ -51,11 +52,12 @@ public class DatabaseConnection extends SQLiteOpenHelper {
 
 
     private static final String CREATE_TABLE_SIGN_UP = String.format(
-            "CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)",
+            "CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)",
             TABLE_SIGN_UP,
             ID,
             NAME,
             TITLE,
+            HINT,
             EMAIL,
             PASSWORD
     );
@@ -128,22 +130,22 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public Boolean insertData(final Credentials userCredentials) {
-        final SQLiteDatabase db = this.getWritableDatabase();
-        final ContentValues values = new ContentValues();
-
-        values.put(NAME, userCredentials.getName());
-        values.put(EMAIL, userCredentials.getEmail());
-        values.put(TITLE, userCredentials.getTitle());
-        values.put(PASSWORD, userCredentials.getPassword());
-
-        long result = db.insert(TABLE_SIGN_UP, null, values);
-        if (result == -1) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+//    public Boolean insertData(final Credentials userCredentials) {
+//        final SQLiteDatabase db = this.getWritableDatabase();
+//        final ContentValues values = new ContentValues();
+//
+//        values.put(NAME, userCredentials.getName());
+//        values.put(EMAIL, userCredentials.getEmail());
+//        values.put(TITLE, userCredentials.getTitle());
+//        values.put(PASSWORD, userCredentials.getPassword());
+//
+//        long result = db.insert(TABLE_SIGN_UP, null, values);
+//        if (result == -1) {
+//            return false;
+//        } else {
+//            return true;
+//        }
+//    }
 
     public Boolean checkUserEmail(String email) {
         final SQLiteDatabase db = this.getWritableDatabase();
@@ -216,7 +218,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
     }
 
 
-    public Boolean checkUserName(final Credentials userCredentials) {
+    public Boolean checkUserName(final User userCredentials) {
         SQLiteDatabase db = this.getWritableDatabase();
         final Cursor cursor = db.query(
                 TABLE_SIGN_UP,
@@ -352,10 +354,6 @@ public class DatabaseConnection extends SQLiteOpenHelper {
 
         return userProfile;
     }
-
-//    public User getUser(final String email) {
-//
-//    }
 
     /**
      * <p>

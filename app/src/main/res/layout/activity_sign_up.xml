@@ -10,7 +10,7 @@
         android:id="@+id/logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ToDo!!"
+        android:text="@string/todo"
         android:textColor="@color/white"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -36,7 +36,7 @@
         app:layout_constraintHorizontal_bias="0.538"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.277"
+        app:layout_constraintVertical_bias="0.242"
         tools:ignore="MissingConstraints" />
 
     <EditText
@@ -51,10 +51,10 @@
         android:paddingRight="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.538"
+        app:layout_constraintHorizontal_bias="0.528"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.749"
+        app:layout_constraintVertical_bias="0.774"
         tools:ignore="MissingConstraints" />
 
     <ImageView
@@ -72,11 +72,28 @@
         app:layout_constraintHorizontal_bias="0.868"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.744"
+        app:layout_constraintVertical_bias="0.776"
         tools:ignore="MissingConstraints" />
 
     <EditText
         android:id="@+id/sign_up_tile"
+        android:layout_width="307dp"
+        android:layout_height="56dp"
+        android:background="@drawable/rounded_textbox"
+        android:drawablePadding="10sp"
+        android:hint="@string/Hint"
+        android:paddingLeft="15dp"
+        android:paddingRight="10sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.528"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.562"
+        tools:ignore="MissingConstraints" />
+
+    <EditText
+        android:id="@+id/sign_up_hint"
         android:layout_width="307dp"
         android:layout_height="56dp"
         android:background="@drawable/rounded_textbox"
@@ -89,7 +106,7 @@
         app:layout_constraintHorizontal_bias="0.538"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.518"
+        app:layout_constraintVertical_bias="0.456"
         tools:ignore="MissingConstraints" />
 
     <EditText
@@ -97,7 +114,7 @@
         android:layout_width="307dp"
         android:layout_height="56dp"
         android:background="@drawable/rounded_textbox"
-        android:hint="Password"
+        android:hint="@string/password"
         android:inputType="textPassword"
         android:paddingLeft="15dp"
         android:paddingRight="10sp"
@@ -106,7 +123,7 @@
         app:layout_constraintHorizontal_bias="0.538"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.634"
+        app:layout_constraintVertical_bias="0.669"
         tools:ignore="MissingConstraints" />
 
     <ImageView
@@ -121,10 +138,10 @@
         android:src="@drawable/baseline_visibility_off_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.866"
+        app:layout_constraintHorizontal_bias="0.868"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.629"
+        app:layout_constraintVertical_bias="0.664"
         tools:ignore="MissingConstraints" />
 
     <EditText
@@ -132,48 +149,49 @@
         android:layout_width="307dp"
         android:layout_height="56dp"
         android:background="@drawable/rounded_textbox"
-        android:hint="Email"
-        android:paddingLeft="15dp"
+        android:hint="@string/email"
+        android:paddingStart="15dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.528"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.398"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintVertical_bias="0.351"
+        tools:ignore="MissingConstraints,RtlSymmetry" />
 
     <Button
         android:id="@+id/register_button"
-        android:layout_width="299dp"
+        android:layout_width="307dp"
         android:layout_height="49dp"
         android:backgroundTint="#3F9758"
-        android:text="Create Account"
+        android:text="@string/create_account"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.571"
+        app:layout_constraintHorizontal_bias="0.572"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.866" />
+        app:layout_constraintVertical_bias="0.89" />
 
     <TextView
         android:id="@+id/already_account"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Already have an account?"
+        android:text="@string/already_have_an_account"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/register_button"
+        app:layout_constraintHorizontal_bias="0.521"
         app:layout_constraintStart_toStartOf="@+id/register_button"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.915"
+        app:layout_constraintVertical_bias="0.942"
         tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/forgot_password"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create Your Account!!"
+        android:text="@string/create_your_account"
         android:textColor="@color/white"
         android:textSize="24sp"
         android:textStyle="bold"
