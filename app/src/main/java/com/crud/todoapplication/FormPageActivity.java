@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.crud.todoapplication.model.Credentials;
 import com.crud.todoapplication.model.User;
 
 public class FormPageActivity extends AppCompatActivity {
@@ -24,7 +25,7 @@ public class FormPageActivity extends AppCompatActivity {
     private User user;
     private static Long id = 0L;
     private DatabaseConnection databaseConnection;
-
+    private Credentials userCredentials;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -38,8 +39,11 @@ public class FormPageActivity extends AppCompatActivity {
         user_name = findViewById(R.id.editTextText);
         user_title = findViewById(R.id.editTextText2);
         user = databaseConnection.getUserProfile();
+//        user = new User();
+        userCredentials = new Credentials();
 
         if (null != user) {
+//            user_name.setText(userCredentials.getName());
             user_name.setText(user.getName());
             user_title.setText(user.getTitle());
             profileIcon.setText(user.setProfileIcon());
@@ -68,6 +72,7 @@ public class FormPageActivity extends AppCompatActivity {
                 databaseConnection.insertUser(user);
 
                 user.setId(++id);
+                System.out.println(user.getId());
                 resultantIntent.putExtra(String.valueOf(R.string.Id), user.getId());
                 resultantIntent.putExtra(String.valueOf(R.string.UserName), user.getName());
                 resultantIntent.putExtra(String.valueOf(R.string.UserTitle), user.getTitle());

@@ -1,23 +1,40 @@
 package com.crud.todoapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crud.todoapplication.api.ApiClient;
+import com.crud.todoapplication.api.ApiService;
+import com.crud.todoapplication.model.User;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.security.MessageDigest;
+import java.security.MessageDigestSpi;
+import java.security.NoSuchAlgorithmException;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText userEmail;
     private EditText userPassword;
+    private ImageView passwordVisibility;
+    private boolean isPasswordVisible;
     private DatabaseConnection databaseConnection;
 
     @SuppressLint("MissingInflatedId")
@@ -32,6 +49,8 @@ public class LoginActivity extends AppCompatActivity {
         final Button signIn = findViewById(R.id.signIn);
         userEmail = findViewById(R.id.login_email);
         userPassword = findViewById(R.id.login_pass);
+        passwordVisibility = findViewById(R.id.visible_password);
+        final User user = databaseConnection.getUserProfile();
          signUp.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
@@ -40,6 +59,12 @@ public class LoginActivity extends AppCompatActivity {
              }
          });
 
+         passwordVisibility.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View view) {
+                 togglePasswordActivity(userPassword, passwordVisibility);
+             }
+         });
          forgotPassword.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View view) {
@@ -53,18 +78,39 @@ public class LoginActivity extends AppCompatActivity {
                  final String email = userEmail.getText().toString();
                  final String pass = userPassword.getText().toString();
 
+
                  if (TextUtils.isEmpty(email) || TextUtils.isEmpty(pass)){
                      showSnackBar("All Fields are Required");
                  } else {
-                     final Boolean checkUserPass = databaseConnection.checkUserNameAndPassword(email, pass);
+                     final String hashPassword = MD5Helper.md5(pass);
 
-                     if (checkUserPass) {
-                         showSnackBar("Login Successfully");
-                         final Intent intent = new Intent(LoginActivity.this, MenuActivity2.class);
-                         startActivity(intent);
-                     } else {
-                         showSnackBar("Login Failed");
-                     }
+                     ApiService apiService = ApiClient.getApiService("http://192.168.1.29:8080/");
+                     Call<ResponseBody> call = apiService.loginUser(email, hashPassword);
+
+                     call.enqueue(new Callback<ResponseBody>() {
+                         @Override
+                         public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                             if (response.isSuccessful()) {
+                                 showSnackBar("Login Success");
+
+                             } else {
+                                 showSnackBar("Login failed");
+                             }
+                         }
+
+                         @Override
+                         public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                                showSnackBar("Network Error: "+ t.getMessage());
+                         }
+                     });
+//                     if (checkUserPass) {
+//                         showSnackBar("Login Successfully");
+//                         final Intent intent = new Intent(LoginActivity.this, MenuActivity2.class);
+//                         intent.putExtra("email", email);
+//                         startActivity(intent);
+//                     } else {
+//                         showSnackBar("Login Failed");
+//                     }
                  }
              }
          });
@@ -72,5 +118,22 @@ public class LoginActivity extends AppCompatActivity {
 
     private void showSnackBar(final String message) {
         Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void togglePasswordActivity(final EditText password, final ImageView passwordVisibility) {
+        if (isPasswordVisible) {
+            password.setInputType(InputType.TYPE_CLASS_TEXT |
+                    InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            isPasswordVisible = false;
+
+            passwordVisibility.setImageResource(R.drawable.visibiltiy);
+        } else {
+            password.setInputType(InputType.TYPE_CLASS_TEXT |
+                    InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            isPasswordVisible = true;
+
+            passwordVisibility.setImageResource(R.drawable.baseline_visibility_off_24);
+        }
+        password.setSelection(password.getText().length());
     }
 }

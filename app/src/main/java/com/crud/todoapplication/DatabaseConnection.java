@@ -24,11 +24,14 @@ public class DatabaseConnection extends SQLiteOpenHelper {
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_TITLE = "title";
+    public static final String COLUMN_EMAIL = "email";
 
     public static final String TABLE_SIGN_UP = "signup";
     public static final String ID = "id";
     public static final String NAME = "name";
     public static final String EMAIL = "email";
+    public static final String TITLE = "title";
+    public static final String HINT = "hint";
     public static final String PASSWORD = "password";
 
     private static final String TABLE_PROJECTS = "projects";
@@ -45,23 +48,27 @@ public class DatabaseConnection extends SQLiteOpenHelper {
     private static final String COLUMN_STATUS = "status";
     private static final String COLUMN_COMPLETED = "CHECKED";
     private static final String COLUMN_UNCOMPLETED = "UNCHECKED";
+    private static final String COLUMN_TODO_ORDER = "order_type";
 
 
     private static final String CREATE_TABLE_SIGN_UP = String.format(
-            "CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT, %s TEXT)",
+            "CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s TEXT, %s TEXT, %s TEXT, %s TEXT)",
             TABLE_SIGN_UP,
             ID,
             NAME,
+            TITLE,
+            HINT,
             EMAIL,
             PASSWORD
     );
 
     private static final String CREATE_TABLE_USERS = String.format(
-            "CREATE TABLE %s (%s INTEGER PRIMARY KEY, %s TEXT, %s TEXT)",
+            "CREATE TABLE %s (%s INTEGER PRIMARY KEY, %s TEXT, %s TEXT, %s TEXT)",
             TABLE_USERS,
             COLUMN_ID,
             COLUMN_NAME,
-            COLUMN_TITLE
+            COLUMN_TITLE,
+            COLUMN_EMAIL
     );
 
     private static final String CREATE_TABLE_PROJECTS = String.format(
@@ -81,6 +88,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
             COLUMN_TODO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             COLUMN_LABEL + " TEXT NOT NULL," +
             COLUMN_project_ID + " INTEGER NOT NULL," +
+            COLUMN_TODO_ORDER + " INTEGER NOT NULL," +
             COLUMN_STATUS + " TEXT CHECK (" + COLUMN_STATUS + " IN ('" + COLUMN_COMPLETED + "', '" + COLUMN_UNCOMPLETED + "'))," +
             "FOREIGN KEY (" + COLUMN_project_ID + ") REFERENCES " + TABLE_PROJECTS + "(" + COLUMN_PROJECT_ID + ")" +
             ")";
@@ -122,21 +130,22 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public Boolean insertData(final Credentials userCredentials) {
-        final SQLiteDatabase db = this.getWritableDatabase();
-        final ContentValues values = new ContentValues();
-
-        values.put(NAME, userCredentials.getName());
-        values.put(EMAIL, userCredentials.getEmail());
-        values.put(PASSWORD, userCredentials.getPassword());
-
-        long result = db.insert(TABLE_SIGN_UP, null, values);
-        if (result == -1) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+//    public Boolean insertData(final Credentials userCredentials) {
+//        final SQLiteDatabase db = this.getWritableDatabase();
+//        final ContentValues values = new ContentValues();
+//
+//        values.put(NAME, userCredentials.getName());
+//        values.put(EMAIL, userCredentials.getEmail());
+//        values.put(TITLE, userCredentials.getTitle());
+//        values.put(PASSWORD, userCredentials.getPassword());
+//
+//        long result = db.insert(TABLE_SIGN_UP, null, values);
+//        if (result == -1) {
+//            return false;
+//        } else {
+//            return true;
+//        }
+//    }
 
     public Boolean checkUserEmail(String email) {
         final SQLiteDatabase db = this.getWritableDatabase();
@@ -185,7 +194,31 @@ public class DatabaseConnection extends SQLiteOpenHelper {
             return false;
     }
 
-    public Boolean checkUserName(final Credentials userCredentials) {
+    @SuppressLint("Range")
+    public User getUserById(final String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {COLUMN_ID, COLUMN_NAME, COLUMN_EMAIL, COLUMN_TITLE};
+        String selection = COLUMN_EMAIL + " = ?";
+        String[] selectionArgs = {String.valueOf(email)};
+
+        Cursor cursor = db.query(TABLE_USERS, columns, selection, selectionArgs, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+            User user = new User();
+            user.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+            user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_NAME)));
+            user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_EMAIL)));
+            user.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
+            cursor.close();
+            return user;
+        } else {
+            return null;
+        }
+    }
+
+
+    public Boolean checkUserName(final User userCredentials) {
         SQLiteDatabase db = this.getWritableDatabase();
         final Cursor cursor = db.query(
                 TABLE_SIGN_UP,
@@ -235,12 +268,26 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         final ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, user.getName());
         values.put(COLUMN_TITLE, user.getTitle());
+        values.put(COLUMN_EMAIL, user.getEmail());
 
         final Long userId = db.insert(TABLE_USERS, null, values);
 
         db.close();
         return  userId;
     }
+
+    public void updateUser(final User user) {
+        final SQLiteDatabase db = this.getWritableDatabase();
+        final ContentValues values = new ContentValues();
+
+        values.put("name", user.getName());
+        values.put("title", user.getTitle());
+        values.put("email", user.getEmail());
+
+
+        db.update(TABLE_USERS, values,  ID + "= ?", new String[]{String.valueOf(user.getId())});
+    }
+
 
     /**
      * <p>
@@ -270,6 +317,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
 
         values.put(COLUMN_LABEL, todoItem.getLabel());
         values.put(COLUMN_project_ID, todoItem.getParentId());
+        values.put(COLUMN_TODO_ORDER, todoItem.getOrder());
         values.put(COLUMN_STATUS, String.valueOf(todoItem.getStatus()));
 
         return db.insert(TABLE_TODO, null, values);
@@ -352,7 +400,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
 
         try (final Cursor cursor = sqLiteDatabase.query(TABLE_TODO, null,
                 String.format("%s = ?", COLUMN_project_ID), new String[]{String.valueOf(projectId)},
-                null, null, null)) {
+                null, null, COLUMN_TODO_ORDER)) {
 
             if (null != cursor && cursor.moveToFirst()) {
                 do {
@@ -387,7 +435,16 @@ public class DatabaseConnection extends SQLiteOpenHelper {
 
         values.put(COLUMN_ORDER, project.getOrder());
         sqLiteDatabase.update(TABLE_PROJECTS, values, String.format("%s = ?",
-                COLUMN_ID), new String[]{String.valueOf(project.getId())});
+                COLUMN_PROJECT_ID), new String[]{String.valueOf(project.getId())});
+    }
+
+    public void updateTodoOrder(final TodoItem todoItem) {
+        final SQLiteDatabase sqLiteDatabase = getWritableDatabase();
+        final ContentValues values = new ContentValues();
+
+        values.put(COLUMN_TODO_ORDER, todoItem.getOrder());
+        sqLiteDatabase.update(TABLE_TODO, values, String.format("%s = ?",
+                COLUMN_TODO_ID), new String[]{String.valueOf(todoItem.getId())});
     }
 }
 

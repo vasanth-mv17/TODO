@@ -7,6 +7,7 @@ public class TodoItem {
     private boolean isChecked;
     private Long parentId;
     private Status status;
+    private Long order;
 
    public enum Status {
        CHECKED,
@@ -42,6 +43,14 @@ public class TodoItem {
             return getLabel();
         }
         return "";
+    }
+
+    public Long getOrder() {
+        return order;
+    }
+
+    public void setOrder(Long order) {
+        this.order = order;
     }
 
     public boolean isChecked() {

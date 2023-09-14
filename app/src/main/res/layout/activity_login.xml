@@ -45,7 +45,6 @@
         android:hint="Password"
         android:inputType="textPassword"
         android:paddingLeft="15dp"
-        android:drawableRight="@drawable/baseline_visibility_off_24"
         android:drawablePadding="10sp"
         android:paddingRight="10sp"
         android:textColorHint="@color/gray"
@@ -55,6 +54,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.467"
+        tools:ignore="MissingConstraints" />
+
+    <ImageView
+        android:id="@+id/visible_password"
+        android:layout_width="45dp"
+        android:layout_height="51dp"
+        android:layout_alignEnd="@+id/login_email"
+        android:layout_alignBottom="@+id/login_email"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="10dp"
+        android:src="@drawable/baseline_visibility_off_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.871"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.469"
         tools:ignore="MissingConstraints" />
 
     <TextView

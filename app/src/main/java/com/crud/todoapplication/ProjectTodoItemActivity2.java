@@ -75,8 +75,8 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     private List<TodoItem> checkedItems;
     private List<TodoItem> unCheckedItems;
     private List<TodoItem> allItems;
-
-
+    private RelativeLayout toolbar;
+    private RelativeLayout toolBar;
     private int currentPage = 1;
     private int pageCapacity = 10;
     private static Long id = 0L;
@@ -88,7 +88,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      *
      * @param savedInstanceState Refers the saved instance of the state
      */
-    @SuppressLint("MissingInflatedId")
+    @SuppressLint({"MissingInflatedId", "ResourceAsColor"})
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,8 +108,8 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         editText = findViewById(R.id.todoEditText);
         pageNumber = findViewById(R.id.pageCount);
         textView = findViewById(R.id.listName);
-        final RelativeLayout toolbar = findViewById(R.id.toolbar);
-        final RelativeLayout toolBar = findViewById(R.id.bottom_toolbar);
+        toolbar = findViewById(R.id.toolbar);
+        toolBar = findViewById(R.id.bottom_toolbar);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -143,10 +143,10 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             toolBar.setBackgroundColor(getResources().getColor(R.color.Secondary));
         }
 
-
         if (selectedProjectName != null) {
             textView.setText(selectedProjectName);
         }
+
 
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -172,6 +172,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             @Override
             public boolean onQueryTextChange(final String newText) {
                 projectListController.onSearchAndDisplayItems(newText);
+
                 if (null != todoItems) {
                     adapter.clearProjects();
                     adapter.addProjects(todoItems);
@@ -332,7 +333,9 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         if (null != todoItems) {
             adapter.clearProjects();
             adapter.addProjects(todoItems);
+            updatePageNumber(pageNumber);
         }
+
         adapter.updateTodoItems(todoItems);
     }
 
@@ -406,79 +409,41 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
 
     /**
      * <p>
-     * Add a new todo item to the TableLayout based on the provided project
-     * </p>
-     *
-     * @param todoItem Refer the Project containing the todo item information
-     */
-    public void addTodoItem(final TodoItem todoItem) {
-        final TableRow tableRow = new TableRow(ProjectTodoItemActivity2.this);
-
-        tableRow.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
-                TableLayout.LayoutParams.WRAP_CONTENT));
-        final CheckBox checkBox = new CheckBox(ProjectTodoItemActivity2.this);
-
-        checkBox.setChecked(todoItem.getStatus() == TodoItem.Status.CHECKED);
-        final TextView label = new TextView(ProjectTodoItemActivity2.this);
-        label.setTextColor(todoItem.getStatus() == TodoItem.Status.CHECKED ? Color.GRAY : Color.BLACK);
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
-               // todoItem.setChecked();
-                todoItem.setStatus(isChecked ? TodoItem.Status.CHECKED : TodoItem.Status.UNCHECKED);
-                databaseConnection.update(todoItem);
-                label.setTextColor(todoItem.getStatus() == TodoItem.Status.CHECKED ? Color.GRAY : Color.BLACK);
-            }
-        });
-        tableRow.addView(checkBox);
-        label.setText(todoItem.getLabel());
-        tableRow.addView(label);
-        final ImageView closeIcon = new ImageView(ProjectTodoItemActivity2.this);
-
-        closeIcon.setImageResource(R.drawable.baseline_close_24);
-        closeIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                removeItem(tableRow, todoItem);
-            }
-        });
-
-        tableRow.addView(closeIcon);
-        tableLayout.addView(tableRow);
-        editText.getText().clear();
-    }
-
-    /**
-     * <p>
      * Stores the items into table layout
      * </p>
      */
+    @SuppressLint("NotifyDataSetChanged")
     public void addNewTodoItem() {
         final String todoLabel = editText.getText().toString();
         if (!todoLabel.isEmpty()) {
             final TodoItem todoItem = new TodoItem(todoLabel);
+            final long itemOrder = adapter.getItemCount() + 1;
+
             todoItem.setParentId(selectedProjectId);
             todoItem.setId(++id);
+            todoItem.setOrder(itemOrder);
             todoItem.setStatus(TodoItem.Status.UNCHECKED);
             todoList.add(todoItem);
 
             databaseConnection.insertTodo(todoItem);
             adapter.notifyDataSetChanged();
-            int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
+            todoItems = todoList.getAllItems(selectedProjectId);
+//            int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
 
-            if (1 == todoItems.size() % pageCapacity && currentPage == totalPageCount - 1) {
-                currentPage = totalPageCount;
-            }
+//            if (1 == todoItems.size() % pageCapacity && currentPage == totalPageCount - 1) {
+//                currentPage = totalPageCount;
+//            }
 
-            pageCapacity = 10;
+//            pageCapacity = 10;
             pageNumber.setVisibility(View.VISIBLE);
             previousPageButton.setEnabled(true);
             previousPageButton.setColorFilter(null);
             nextPageButton.setEnabled(true);
             nextPageButton.setColorFilter(null);
 
-            editText.getText().clear();
+            updateRecyclerView();
             updatePageNumber(pageNumber);
+            editText.getText().clear();
 
         }
     }
@@ -488,25 +453,6 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      * Update the tableLayout with todo items, checkboxes and close icons
      * </p>
      */
-//    private void updateTableLayout() {
-//        tableLayout.removeAllViews();
-////        todoItems = todoList.getAllItems();
-//
-//        Collections.sort(todoItems, new Comparator<TodoItem>() {
-//            @Override
-//            public int compare(TodoItem item1, TodoItem item2) {
-//                return item1.getSortingValue(filter.getAttribute())
-//                        .compareToIgnoreCase(item2.getSortingValue(filter.getAttribute()));
-//            }
-//        });
-//        final int startIndex = (currentPage - 1) * pageCapacity;
-//        final int endIndex = Math.min(startIndex + pageCapacity, todoItems.size());
-//
-//        for (int i = startIndex; i < endIndex; i++) {
-//            final TodoItem todoItem = todoItems.get(i);
-//            addTodoItem(todoItem);
-//        }
-//    }
 
     private void updateRecyclerView() {
         int startIndex = (currentPage - 1) * pageCapacity;

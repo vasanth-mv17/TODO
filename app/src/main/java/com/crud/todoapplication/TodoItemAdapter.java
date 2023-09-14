@@ -67,17 +67,26 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
     }
 
     public void onItemMove(final int fromPosition, final int toPosition) {
-        if (fromPosition < toPosition) {
-            for (int i = fromPosition; i < toPosition; i++) {
-                Collections.swap(todoItems, i, i + 1);
-            }
-        } else {
-            for (int i = fromPosition; i > toPosition; i--) {
-                Collections.swap(todoItems, i, i - 1);
-            }
-        }
-        notifyItemMoved(fromPosition, toPosition);
+//        if (fromPosition < toPosition) {
+//            for (int i = fromPosition; i < toPosition; i++) {
+//                Collections.swap(todoItems, i, i + 1);
+//            }
+//        } else {
+//            for (int i = fromPosition; i > toPosition; i--) {
+//                Collections.swap(todoItems, i, i - 1);
+//            }
+//        }
+//        notifyItemMoved(fromPosition, toPosition);
 
+        final TodoItem fromList = todoItems.get(fromPosition);
+        final TodoItem toList = todoItems.get(toPosition);
+
+        Collections.swap(todoItems, fromPosition, toPosition);
+        fromList.setOrder((long) (toPosition + 1));
+        toList.setOrder((long) (fromPosition + 1));
+        notifyItemMoved(fromPosition, toPosition);
+        databaseConnection.updateTodoOrder(fromList);
+        databaseConnection.updateTodoOrder(toList);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -95,7 +104,6 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
         public void bind(final TodoItem todoItem, final DatabaseConnection databaseConnection) {
             itemText.setText(todoItem.getLabel());
             checkBox.setChecked(todoItem.getStatus() == TodoItem.Status.CHECKED);
-            checkBox.setButtonDrawable(R.color.Primary);
             itemText.setTextColor(todoItem.getStatus() == TodoItem.Status.CHECKED ? Color.GRAY : Color.BLACK);
 
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -129,6 +137,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateTodoItems(List<TodoItem> updatedItems) {
         this.todoItems = updatedItems;
         notifyDataSetChanged();

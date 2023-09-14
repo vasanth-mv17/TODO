@@ -55,13 +55,21 @@
     <string name="Id">Id</string>
     <string name="UserName">User Name</string>
     <string name="UserTitle">UserTitle</string>
-    <string name="ProjectId"></string>
-    <string name="ProjectName"></string>
+    <string name="ProjectId">ProjectId</string>
+    <string name="ProjectName">ProjectName</string>
     <string name="project">project</string>
     <string name="users">users</string>
     <string name="id">id</string>
     <string name="name">name</string>
     <string name="enter_list">Enter List</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="Hint">Hint</string>
+    <string name="create_your_account">Create Your Account!!</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="create_account">Create Account</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="todo">ToDo!!</string>
 
 
 </resources>
