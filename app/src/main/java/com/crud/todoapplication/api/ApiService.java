@@ -21,5 +21,14 @@ public interface ApiService {
             @Field("email") String email,
             @Field("password") String password
     );
+
+    @FormUrlEncoded
+    @POST("api/v1/user/reset/password/")
+    Call<ResponseBody> resetPassword(
+            @Field("email") String email,
+            @Field("password") String password,
+            @Field("oldHint") String oldHint,
+            @Field("newHint") String newHint
+    );
 }
 
