@@ -70,6 +70,9 @@
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="todo">ToDo!!</string>
+    <string name="old_hint">Old Hint</string>
+    <string name="new_hint">New Hint</string>
+    <string name="forgot_password">Forgot Password ?</string>
 
 
 </resources>

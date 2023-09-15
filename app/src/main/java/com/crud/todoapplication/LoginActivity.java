@@ -1,11 +1,11 @@
 package com.crud.todoapplication;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
@@ -13,21 +13,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.crud.todoapplication.api.ApiClient;
-import com.crud.todoapplication.api.ApiService;
+import com.crud.todoapplication.api.AuthenticationService;
 import com.crud.todoapplication.model.User;
 import com.google.android.material.snackbar.Snackbar;
-
-import java.security.MessageDigest;
-import java.security.MessageDigestSpi;
-import java.security.NoSuchAlgorithmException;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -83,26 +72,23 @@ public class LoginActivity extends AppCompatActivity {
                      showSnackBar("All Fields are Required");
                  } else {
                      final String hashPassword = MD5Helper.md5(pass);
+                    final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.29:8080/");
+                    authenticationService.login(email, hashPassword, new AuthenticationService.ApiResponseCallBack() {
+                        @Override
+                        public void onSuccess(String response) {
+                            showSnackBar("Login Success");
+                            new Handler().postDelayed(() -> {
+                                final Intent intent = new Intent(LoginActivity.this, MenuActivity2.class);
+                                startActivity(intent);
+                                finish();
+                            },1000);
+                        }
 
-                     ApiService apiService = ApiClient.getApiService("http://192.168.1.29:8080/");
-                     Call<ResponseBody> call = apiService.loginUser(email, hashPassword);
-
-                     call.enqueue(new Callback<ResponseBody>() {
-                         @Override
-                         public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                             if (response.isSuccessful()) {
-                                 showSnackBar("Login Success");
-
-                             } else {
-                                 showSnackBar("Login failed");
-                             }
-                         }
-
-                         @Override
-                         public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                                showSnackBar("Network Error: "+ t.getMessage());
-                         }
-                     });
+                        @Override
+                        public void onFailure(String response) {
+                            showSnackBar("Login Failed");
+                        }
+                    });
 //                     if (checkUserPass) {
 //                         showSnackBar("Login Successfully");
 //                         final Intent intent = new Intent(LoginActivity.this, MenuActivity2.class);

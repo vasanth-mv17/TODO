@@ -1,11 +1,11 @@
 package com.crud.todoapplication;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
@@ -14,18 +14,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.crud.todoapplication.api.ApiClient;
-import com.crud.todoapplication.api.ApiService;
-import com.crud.todoapplication.model.ApiResponse;
+import com.crud.todoapplication.api.AuthenticationService;
 import com.crud.todoapplication.model.Credentials;
 import com.crud.todoapplication.model.SignUp;
 import com.crud.todoapplication.model.User;
 import com.google.android.material.snackbar.Snackbar;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -110,47 +103,24 @@ public class SignUpActivity extends AppCompatActivity {
                         final Boolean checkEmail = databaseConnection.checkUserSignUpEmail(userCredentials);
 
                         if (!checkUser && !checkEmail) {
-//                            final Boolean insert = databaseConnection.insertData(userCredentials);
-
-                            ApiService apiService = ApiClient.getApiService("http://192.168.1.29:8080/");
-                            final SignUp signUp = new SignUp(user, userCredentials);
-                            Call<ResponseBody> call = apiService.createUser(signUp);
-
-                            call.enqueue(new Callback<ResponseBody>() {
+                            final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.29:8080/");
+                            final SignUp signUpUser = new SignUp(user, userCredentials);
+                            authenticationService.signUp(signUpUser, new AuthenticationService.ApiResponseCallBack() {
                                 @Override
-                                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                                    if (response.isSuccessful()) {
-                                        showSnackBar("Registration Success");
-//                                        final Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-//                                        startActivity(intent);
-//                                        finish();
-                                    } else {
-                                        showSnackBar("Registration failed");
-                                    }
+                                public void onSuccess(String response) {
+                                    showSnackBar("SignUp Successfully");
+                                    new Handler().postDelayed(() -> {
+                                        final Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    },1000);
                                 }
 
                                 @Override
-                                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                                        showSnackBar(t.getMessage());
+                                public void onFailure(String response) {
+                                    showSnackBar("SignUp Failed");
                                 }
                             });
-
-
-
-//                            final User user = new User();
-//                            user.setName(userName.getText().toString());
-//                            user.setEmail(email.getText().toString());
-//                            user.setTitle("");
-//                            databaseConnection.insertUser(user);
-
-//                            if (insert) {
-//                                showSnackBar("Registered Successfully");
-//                                final Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-//                                startActivity(intent);
-//                                finish();
-//                            } else {
-//                                showSnackBar("Registration Failed");
-//                            }
                         } else {
                             showSnackBar("User already exists");
                         }
