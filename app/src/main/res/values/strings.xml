@@ -73,6 +73,26 @@
     <string name="old_hint">Old Hint</string>
     <string name="new_hint">New Hint</string>
     <string name="forgot_password">Forgot Password ?</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="greeting">Greeting!!</string>
+    <string name="sign_in">Sign In</string>
+    <string name="don_t_have_an_account">Don\'t have an account?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="remember_me">Remember Me</string>
+    <string name="All_fields_are_required">All Fields are Required</string>
+    <string name="Signup_successful">SignUp Successfully</string>
+    <string name="Signup_failed">SignUp Failed</string>
+    <string name="User_already_exists">User already exists</string>
+    <string name="Password_mismatch">Password mismatch</string>
+    <string name="Login_success">Login Success"</string>
+    <string name="login_failed">Login Failed</string>
+    <string name="update_failed">Update Failed</string>
+    <string name="updated_successful">Updated Successful</string>
+    <string name="password_mismatch">Password Mismatch</string>
+    <string name="all_fields_are_required">All Fields are Required</string>
+    <string name="data">data</string>
+    <string name="token">token</string>
+    <string name="added_successful">Added successful</string>
 
 
 </resources>

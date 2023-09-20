@@ -18,6 +18,9 @@ import com.crud.todoapplication.api.AuthenticationService;
 import com.crud.todoapplication.model.User;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText userEmail;
@@ -40,66 +43,69 @@ public class LoginActivity extends AppCompatActivity {
         userPassword = findViewById(R.id.login_pass);
         passwordVisibility = findViewById(R.id.visible_password);
         final User user = databaseConnection.getUserProfile();
-         signUp.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View view) {
-                 final Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
-                 startActivity(intent);
-             }
-         });
+        signUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Intent intent = new Intent(LoginActivity.this, SignUpActivity.class);
+                startActivity(intent);
+            }
+        });
 
-         passwordVisibility.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View view) {
-                 togglePasswordActivity(userPassword, passwordVisibility);
-             }
-         });
-         forgotPassword.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View view) {
-                 final Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
-                 startActivity(intent);
-             }
-         });
-         signIn.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View view) {
-                 final String email = userEmail.getText().toString();
-                 final String pass = userPassword.getText().toString();
+        passwordVisibility.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                togglePasswordActivity(userPassword, passwordVisibility);
+            }
+        });
+        forgotPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+                startActivity(intent);
+            }
+        });
+        signIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final String email = userEmail.getText().toString();
+                final String pass = userPassword.getText().toString();
 
-
-                 if (TextUtils.isEmpty(email) || TextUtils.isEmpty(pass)){
-                     showSnackBar("All Fields are Required");
-                 } else {
-                     final String hashPassword = MD5Helper.md5(pass);
-                    final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.29:8080/");
+                if (TextUtils.isEmpty(email) || TextUtils.isEmpty(pass)) {
+                    showSnackBar(String.valueOf(R.string.All_fields_are_required));
+                } else {
+                    final String hashPassword = MD5Helper.md5(pass);
+                    final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.109:8080/");
                     authenticationService.login(email, hashPassword, new AuthenticationService.ApiResponseCallBack() {
                         @Override
                         public void onSuccess(String response) {
-                            showSnackBar("Login Success");
-                            new Handler().postDelayed(() -> {
-                                final Intent intent = new Intent(LoginActivity.this, MenuActivity2.class);
-                                startActivity(intent);
-                                finish();
-                            },1000);
+                            showSnackBar(String.valueOf(R.string.Login_success));
+
+                            try {
+                                final JSONObject jsonObject = new JSONObject(response);
+                                final JSONObject data = jsonObject.getJSONObject(getString(R.string.data));
+                                final String token = data.getString(getString(R.string.token));
+
+
+                                new Handler().postDelayed(() -> {
+                                    final Intent intent = new Intent(LoginActivity.this, MenuActivity2.class);
+                                    intent.putExtra(getString(R.string.token), token);
+
+                                    startActivity(intent);
+                                    finish();
+                                }, 100);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
 
                         @Override
                         public void onFailure(String response) {
-                            showSnackBar("Login Failed");
+                            showSnackBar(getString(R.string.login_failed));
                         }
                     });
-//                     if (checkUserPass) {
-//                         showSnackBar("Login Successfully");
-//                         final Intent intent = new Intent(LoginActivity.this, MenuActivity2.class);
-//                         intent.putExtra("email", email);
-//                         startActivity(intent);
-//                     } else {
-//                         showSnackBar("Login Failed");
-//                     }
-                 }
-             }
-         });
+                }
+            }
+        });
     }
 
     private void showSnackBar(final String message) {
