@@ -38,8 +38,8 @@ public class FormPageActivity extends AppCompatActivity {
         profileIcon = findViewById(R.id.profileIcon);
         user_name = findViewById(R.id.editTextText);
         user_title = findViewById(R.id.editTextText2);
-        user = databaseConnection.getUserProfile();
-//        user = new User();
+        //user = databaseConnection.getUserProfile();
+        user = new User();
         userCredentials = new Credentials();
 
         if (null != user) {
@@ -47,11 +47,12 @@ public class FormPageActivity extends AppCompatActivity {
             user_name.setText(user.getName());
             user_title.setText(user.getTitle());
             profileIcon.setText(user.setProfileIcon());
-        } else {
-            user = new User();
-            user.setName(getIntent().getStringExtra(String.valueOf(R.string.Name)));
-            user.setTitle(getIntent().getStringExtra(String.valueOf(R.string.Title)));
         }
+//        else {
+//            user = new User();
+//            user.setName(getIntent().getStringExtra(String.valueOf(R.string.Name)));
+//            user.setTitle(getIntent().getStringExtra(String.valueOf(R.string.Title)));
+//        }
 
         backMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,9 +72,9 @@ public class FormPageActivity extends AppCompatActivity {
                 profileIcon.setText(user.setProfileIcon());
                 databaseConnection.insertUser(user);
 
-                user.setId(++id);
-                System.out.println(user.getId());
-                resultantIntent.putExtra(String.valueOf(R.string.Id), user.getId());
+                //user.setId(++id);
+                //System.out.println(user.getId());
+                //resultantIntent.putExtra(String.valueOf(R.string.Id), user.getId());
                 resultantIntent.putExtra(String.valueOf(R.string.UserName), user.getName());
                 resultantIntent.putExtra(String.valueOf(R.string.UserTitle), user.getTitle());
                 setResult(RESULT_OK, resultantIntent);

@@ -2,16 +2,16 @@ package com.crud.todoapplication.model;
 
 public class User {
 
-    private Long id;
+    private String id;
     private String email;
     private String name;
     private String title;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(final Long id) {
+    public void setId(final String id) {
         this.id = id;
     }
 

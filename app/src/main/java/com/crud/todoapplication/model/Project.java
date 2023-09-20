@@ -2,16 +2,17 @@ package com.crud.todoapplication.model;
 
 public class Project {
 
-    private Long id;
-    private String label;
+    private String id;
+    private String name;
+    private String description;
     private Long userId;
     private Long order;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -23,12 +24,20 @@ public class Project {
         this.userId = userId;
     }
 
-    public String getLabel() {
-        return label;
+    public String getName() {
+        return name;
     }
 
-    public void setLabel(String label) {
-        this.label = label;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Long getOrder() {
@@ -40,7 +49,7 @@ public class Project {
     }
 
     public String toString() {
-        return label;
+        return name;
     }
 }
 

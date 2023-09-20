@@ -86,7 +86,7 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
             userName.setText(user.getName());
             userTitle.setText(user.getTitle());
             profileIcon.setText(user.setProfileIcon());
-            userId = user.getId();
+//            userId = user.getId();
         }
 
         menuButton.setOnClickListener(new View.OnClickListener() {
@@ -169,7 +169,7 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
         final Intent intent = new Intent(MenuActivity.this,ProjectTodoItemActivity.class);
 
         intent.putExtra("Project Id", project.getId());
-        intent.putExtra("Project name", project.getLabel());
+        intent.putExtra("Project name", project.getName());
         startActivity(intent);
     }
 
@@ -225,8 +225,8 @@ public class MenuActivity extends AppCompatActivity implements MenuView{
         if (!projectName.isEmpty()) {
             final Project project = new Project();
             project.setUserId(userId);
-            project.setId(++id);
-            project.setLabel(projectName);
+            //project.setId(++id);
+            project.setName(projectName);
             projectList.add(project);
             databaseConnection.insertProject(project);
             arrayAdapter.notifyDataSetChanged();

@@ -58,16 +58,16 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
                 final String hashPassword = MD5Helper.md5(pass);
                 if (TextUtils.isEmpty(email) || TextUtils.isEmpty(pass) || TextUtils.isEmpty(rePass) || TextUtils.isEmpty(oldHintForPassword) || TextUtils.isEmpty(newHintForPassword)) {
-                    showSnackBar("All Fields are Required");
+                    showSnackBar(getString(R.string.all_fields_are_required));
                 } else {
                     if (!pass.equals(rePass)) {
-                        showSnackBar("Password Mismatch");
+                        showSnackBar(getString(R.string.password_mismatch));
                     } else {
-                        final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.29:8080/");
+                        final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.109:8080/");
                         authenticationService.resetPassword(email, hashPassword, oldHintForPassword, newHintForPassword, new AuthenticationService.ApiResponseCallBack() {
                             @Override
                             public void onSuccess(String response) {
-                                showSnackBar("Updated Successful");
+                                showSnackBar(getString(R.string.updated_successful));
                                 new Handler().postDelayed(() -> {
                                     final Intent intent = new Intent(ForgotPasswordActivity.this, LoginActivity.class);
                                     startActivity(intent);
@@ -77,7 +77,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
                             @Override
                             public void onFailure(String response) {
-                                showSnackBar("Update Failed");
+                                showSnackBar(getString(R.string.update_failed));
                             }
                         });
                     }

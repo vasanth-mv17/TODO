@@ -22,8 +22,6 @@ import com.google.android.material.snackbar.Snackbar;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    private Button signUp;
-    private TextView alreadyAccount;
     private EditText userName;
     private EditText email;
     private EditText title;
@@ -45,7 +43,7 @@ public class SignUpActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-        alreadyAccount = findViewById(R.id.already_account);
+        TextView alreadyAccount = findViewById(R.id.already_account);
         userName = findViewById(R.id.sign_up_name);
         email = findViewById(R.id.sign_up_email);
         title = findViewById(R.id.sign_up_tile);
@@ -54,7 +52,7 @@ public class SignUpActivity extends AppCompatActivity {
         passwordVisibility = findViewById(R.id.visible_icon);
         confirmPasswordVisibility = findViewById(R.id.visibility_confirm);
         rePassword = findViewById(R.id.sign_up_repass);
-        signUp = findViewById(R.id.register_button);
+        Button signUp = findViewById(R.id.register_button);
         userCredentials = new Credentials();
         user = new User();
         databaseConnection = new DatabaseConnection(this);
@@ -96,36 +94,36 @@ public class SignUpActivity extends AppCompatActivity {
                 userCredentials.setConformPassword(hashedConfirmPassword);
 
                 if (TextUtils.isEmpty(user.getName()) || TextUtils.isEmpty(userCredentials.getEmail()) || TextUtils.isEmpty(userCredentials.getPassword()) || TextUtils.isEmpty(userCredentials.getHint()) || TextUtils.isEmpty(userCredentials.getConformPassword()) || TextUtils.isEmpty(user.getTitle())) {
-                    showSnackBar("All Fields are Required");
+                    showSnackBar(String.valueOf(R.string.all_fields_are_required));
                 } else {
                     if (userCredentials.getPassword().equals(userCredentials.getConformPassword())) {
                         final Boolean checkUser = databaseConnection.checkUserName(user);
                         final Boolean checkEmail = databaseConnection.checkUserSignUpEmail(userCredentials);
 
                         if (!checkUser && !checkEmail) {
-                            final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.29:8080/");
+                            final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.109:8080/");
                             final SignUp signUpUser = new SignUp(user, userCredentials);
                             authenticationService.signUp(signUpUser, new AuthenticationService.ApiResponseCallBack() {
                                 @Override
                                 public void onSuccess(String response) {
-                                    showSnackBar("SignUp Successfully");
+                                    showSnackBar(getString(R.string.Signup_successful));
                                     new Handler().postDelayed(() -> {
                                         final Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
                                         startActivity(intent);
                                         finish();
-                                    },1000);
+                                    },100);
                                 }
 
                                 @Override
                                 public void onFailure(String response) {
-                                    showSnackBar("SignUp Failed");
+                                    showSnackBar(getString(R.string.Signup_failed));
                                 }
                             });
                         } else {
-                            showSnackBar("User already exists");
+                            showSnackBar(getString(R.string.User_already_exists));
                         }
                     } else {
-                        showSnackBar("Password mismatch");
+                        showSnackBar(getString(R.string.password_mismatch));
                     }
                 }
             }

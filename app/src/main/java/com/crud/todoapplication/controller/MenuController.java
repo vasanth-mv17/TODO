@@ -68,7 +68,7 @@ public class MenuController {
      * @param project Refers the project for the deletion
      */
     public void onListItemLongClicked(final Project project) {
-        projectList.remove(project.getId());
+//        projectList.remove(project.getId());
         menuActivity.removeProjectFromList(project);
     }
 }

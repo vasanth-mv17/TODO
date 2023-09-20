@@ -43,14 +43,14 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
 
         holder.projectNameTextView.setTextSize(textSize);
         holder.projectNameTextView.setTypeface(typeface);
-        holder.projectNameTextView.setText(project.getLabel());
-
+        holder.projectNameTextView.setText(project.getName());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 final Intent intent = new Intent(context, ProjectTodoItemActivity2.class);
+
                 intent.putExtra(String.valueOf(R.string.ProjectId), project.getId());
-                intent.putExtra(String.valueOf(R.string.ProjectName), project.getLabel());
+                intent.putExtra(String.valueOf(R.string.ProjectName), project.getName());
                 context.startActivity(intent);
             }
         });
@@ -71,16 +71,6 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
     }
 
     public void onItemMove(final int fromPosition, final int toPosition) {
-//        if (fromPosition < toPosition) {
-//            for (int i = fromPosition; i < toPosition; i++) {
-//                Collections.swap(projects, i, i + 1);
-//            }
-//        } else {
-//            for (int i = fromPosition; i > toPosition; i--) {
-//                Collections.swap(projects, i, i - 1);
-//            }
-//        }
-//        notifyItemMoved(fromPosition, toPosition);
         final Project fromProject = projects.get(fromPosition);
         final Project toProject = projects.get(toPosition);
 

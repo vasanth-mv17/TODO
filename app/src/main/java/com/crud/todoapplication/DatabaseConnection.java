@@ -206,7 +206,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         if (cursor != null) {
             cursor.moveToFirst();
             User user = new User();
-            user.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+//            user.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
             user.setName(cursor.getString(cursor.getColumnIndex(COLUMN_NAME)));
             user.setEmail(cursor.getString(cursor.getColumnIndex(COLUMN_EMAIL)));
             user.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
@@ -301,7 +301,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         final SQLiteDatabase db = this.getWritableDatabase();
         final ContentValues values = new ContentValues();
 
-        values.put(COLUMN_PROJECT_LABEL, project.getLabel());
+        values.put(COLUMN_PROJECT_LABEL, project.getName());
         values.put(COLUMN_PROJECT_USER_ID, project.getUserId());
         values.put(COLUMN_ORDER, project.getOrder());
 
@@ -345,8 +345,8 @@ public class DatabaseConnection extends SQLiteOpenHelper {
 
         if (null != cursor && cursor.moveToFirst()) {
             userProfile = new User();
-
-            userProfile.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+//
+//            userProfile.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
             userProfile.setName(cursor.getString(cursor.getColumnIndex(COLUMN_NAME)));
             userProfile.setTitle(cursor.getString(cursor.getColumnIndex(COLUMN_TITLE)));
             cursor.close();
@@ -379,8 +379,8 @@ public class DatabaseConnection extends SQLiteOpenHelper {
                     final Long userId = cursor.getLong(cursor.getColumnIndex(COLUMN_PROJECT_USER_ID));
                     final Project project = new Project();
 
-                    project.setId(projectId);
-                    project.setLabel(projectName);
+                    //project.setId(projectId);
+                    project.setName(projectName);
                     project.setUserId(userId);
                     projects.add(project);
                 } while (cursor.moveToNext());
