@@ -1,12 +1,11 @@
 package com.crud.todoapplication;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,15 +17,26 @@ import java.util.Collections;
 import java.util.List;
 
 public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHolder> {
-    private List<Project> projects;
-    private Context context;
-    private DatabaseConnection databaseConnection;
+    private final List<Project> projects;
+    private final DatabaseConnection databaseConnection;
+    private OnItemClickListener onItemClickListener;
 
-    public ProjectAdapter(final List<Project> projects, final Context context, final DatabaseConnection databaseConnection) {
+    public interface OnItemClickListener {
+
+        void onItemClick(int position);
+        void onRemoveItem(int position);
+        void onUpdateItem(final Project fromProject, final Project toProject);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    public ProjectAdapter(final List<Project> projects, final DatabaseConnection databaseConnection) {
         this.projects = projects;
-        this.context = context;
         this.databaseConnection = databaseConnection;
     }
+
 
     @NonNull
     @Override
@@ -36,7 +46,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         final Project project = projects.get(position);
         Typeface typeface = FontManager.getCurrentTypeface();
         float textSize = FontManager.getCurrentFontSize();
@@ -47,11 +57,8 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                final Intent intent = new Intent(context, ProjectTodoItemActivity2.class);
 
-                intent.putExtra(String.valueOf(R.string.ProjectId), project.getId());
-                intent.putExtra(String.valueOf(R.string.ProjectName), project.getName());
-                context.startActivity(intent);
+                onItemClickListener.onItemClick(position);
             }
         });
     }
@@ -63,10 +70,47 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView projectNameTextView;
+        ImageButton removeButton;
+        //ImageButton updateButton;
 
         public ViewHolder(@NonNull final View itemView) {
             super(itemView);
             projectNameTextView = itemView.findViewById(R.id.projectNameTextView);
+            removeButton = itemView.findViewById(R.id.remove_project);
+            //updateButton = itemView.findViewById(R.id.update_project);
+
+            removeButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    final int position = getAdapterPosition();
+
+                    if (position != RecyclerView.NO_POSITION && null != onItemClickListener) {
+                        onItemClickListener.onRemoveItem(position);
+                        final Project project = projects.get(position);
+
+                        if (projects.contains(project)) {
+                            projects.remove(position);
+                            notifyItemRemoved(position);
+                        }
+                    }
+                }
+            });
+
+//            updateButton.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+////                    final int position = getAdapterPosition();
+////
+////                    if (position != RecyclerView.NO_POSITION && null != onItemClickListener) {
+////                        onItemClickListener.onUpdateItem(position, projectNameTextView.getText().toString());
+////                        final Project project = projects.get(position);
+////
+////                        if (projects.contains(project)) {
+////
+////                        }
+////                    }
+//                }
+//            });
         }
     }
 
@@ -78,8 +122,9 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
         fromProject.setOrder((long) (toPosition + 1));
         toProject.setOrder((long) fromPosition + 1);
         notifyItemMoved(fromPosition, toPosition);
-        databaseConnection.updateProjectsOrder(fromProject);
-        databaseConnection.updateProjectsOrder(toProject);
+//        databaseConnection.updateProjectsOrder(fromProject);
+//        databaseConnection.updateProjectsOrder(toProject);
+        onItemClickListener.onUpdateItem(fromProject, toProject);
     }
 
     @SuppressLint("NotifyDataSetChanged")

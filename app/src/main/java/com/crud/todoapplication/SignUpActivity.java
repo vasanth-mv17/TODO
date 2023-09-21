@@ -87,11 +87,11 @@ public class SignUpActivity extends AppCompatActivity {
                 userCredentials.setHint(hint.getText().toString());
                 userCredentials.setConformPassword(rePassword.getText().toString());
 
-                String hashedPassword = MD5Helper.md5(userCredentials.getPassword());
-                String hashedConfirmPassword = MD5Helper.md5(userCredentials.getConformPassword());
+//                String hashedPassword = MD5Helper.md5(userCredentials.getPassword());
+//                String hashedConfirmPassword = MD5Helper.md5(userCredentials.getConformPassword());
 
-                userCredentials.setPassword(hashedPassword);
-                userCredentials.setConformPassword(hashedConfirmPassword);
+//                userCredentials.setPassword(hashedPassword);
+//                userCredentials.setConformPassword(hashedConfirmPassword);
 
                 if (TextUtils.isEmpty(user.getName()) || TextUtils.isEmpty(userCredentials.getEmail()) || TextUtils.isEmpty(userCredentials.getPassword()) || TextUtils.isEmpty(userCredentials.getHint()) || TextUtils.isEmpty(userCredentials.getConformPassword()) || TextUtils.isEmpty(user.getTitle())) {
                     showSnackBar(String.valueOf(R.string.all_fields_are_required));

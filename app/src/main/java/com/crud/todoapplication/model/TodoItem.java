@@ -2,10 +2,11 @@ package com.crud.todoapplication.model;
 
 public class TodoItem {
 
-    private Long id;
-    private String label;
+    private String id;
+    private String name;
+    private String description;
     private boolean isChecked;
-    private Long parentId;
+    private String parentId;
     private Status status;
     private Long order;
 
@@ -13,34 +14,39 @@ public class TodoItem {
        CHECKED,
        UNCHECKED;
    }
-    public TodoItem(final String label) {
-        this.label = label;
-    }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(final Long id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
-    public String getLabel() {
-        return label;
+    public String getName() {
+        return name;
     }
 
-    public void setLabel(final String label) {
-        this.label = label;
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getSortingValue(final String attribute) {
 
         if ("label".equals(attribute)) {
-            return getLabel();
+            return getName();
         } else if ("isChecked".equals(attribute)) {
-            return getLabel();
+            return getName();
         } else if ("unChecked".equals(attribute)) {
-            return getLabel();
+            return getName();
         }
         return "";
     }
@@ -64,11 +70,11 @@ public class TodoItem {
     this.isChecked = !this.isChecked;
 }
 
-    public Long getParentId() {
+    public String getParentId() {
         return parentId;
     }
 
-    public void setParentId(final Long parentId) {
+    public void setParentId(final String parentId) {
         this.parentId = parentId;
     }
 
@@ -80,7 +86,7 @@ public class TodoItem {
         this.status = status;
     }
     public String toString() {
-        return label;
+        return name;
     }
 }
 

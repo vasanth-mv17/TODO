@@ -6,10 +6,12 @@ import com.crud.todoapplication.model.SignUp;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+
 
 public interface ApiService {
     @POST("api/v1/user/signup/")
@@ -31,10 +33,8 @@ public interface ApiService {
             @Field("newHint") String newHint
     );
 
-    @POST("api/v1/project/")
-    Call<ResponseBody> create(@Body Project project);
+    @GET("api/v1/user/details")
+    Call<ResponseBody> getUserDetail();
 
-    @GET("api/v1/project/")
-    Call<ResponseBody> getAll();
 }
 

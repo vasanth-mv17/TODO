@@ -93,6 +93,7 @@
     <string name="data">data</string>
     <string name="token">token</string>
     <string name="added_successful">Added successful</string>
+    <string name="project_name">Project Name</string>
 
 
 </resources>

@@ -1,24 +1,19 @@
 package com.crud.todoapplication;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
@@ -27,8 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.crud.todoapplication.api.AuthenticationService;
-import com.crud.todoapplication.api.TodoProjectService;
-import com.crud.todoapplication.controller.MenuController;
+import com.crud.todoapplication.api.ProjectService;
 import com.crud.todoapplication.model.Credentials;
 import com.crud.todoapplication.model.Project;
 import com.crud.todoapplication.model.ProjectList;
@@ -66,8 +60,6 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     private TextView profileIcon;
     private TextView userName;
     private TextView userTitle;
-    private static Long id = 0L;
-    private Long userId;
     private String token;
     private int currentTheme = R.style.Green;
 
@@ -93,41 +85,18 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         profileIcon = findViewById(R.id.profileIcon);
         userName = findViewById(R.id.profileName);
         userTitle = findViewById(R.id.profileTitle);
-        user = databaseConnection.getUserProfile();
+        user = new User();
         projects = projectList.getAllList();
         userCredentials  = new Credentials();
-        Intent intent = getIntent();
-        //String Email = intent.getStringExtra("email");
         token = getIntent().getStringExtra(getString(R.string.token));
-        //final User user = databaseConnection.getUserById(Email);
-       // userId = user.getId();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ProjectAdapter(projects, MenuActivity2.this, databaseConnection);
+        adapter = new ProjectAdapter(projects, databaseConnection);
         androidx.recyclerview.widget.ItemTouchHelper.Callback callback = new ItemTouchHelper(adapter);
         androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper = new androidx.recyclerview.widget.ItemTouchHelper(callback);
-        loadProjectsFromDataBase();
         recyclerView.setAdapter(adapter);
         itemTouchHelper.attachToRecyclerView(recyclerView);
-
-
-//        if (userName != null && userTitle != null) {
-//           // user.setId(userId);
-//            user.setName(user.getName());
-//            user.setTitle(user.getTitle());
-//            user.setEmail(Email);
-//            //databaseConnection.updateUser(user);
-//
-//        }
-
-        if (null != user) {
-//            userName.setText(getIntent().getStringExtra(userCredentials.getName()));
-//            assert userName != null;
-            userName.setText(user.getName());
-            userTitle.setText(user.getTitle());
-            profileIcon.setText(user.setProfileIcon());
-           // userId = user.getId();
-
-        }
+        getUserDetail();
+        loadProjectsFromDataBase();
 
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,8 +111,6 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
             public void onClick(View view) {
                 final Intent intent = new Intent(MenuActivity2.this, FormPageActivity.class);
 
-//                intent.putExtra(String.valueOf(R.string.Name), userName.getText().toString());
-//                intent.putExtra(String.valueOf(R.string.Title), userTitle.getText().toString());
                 startActivityIfNeeded(intent, REQUEST_CODE);
             }
         });
@@ -158,7 +125,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
 
                 if (!projectLabel.isEmpty()) {
                     final Project project = new Project();
-                    final TodoProjectService projectService = new TodoProjectService("http://192.168.1.109:8080/",token);
+                    final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/",token);
 
                     project.setName(projectLabel);
                     project.setDescription("desc");
@@ -177,19 +144,30 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
                     });
 
                     addListItem.setText("");
-
-//                    project.setUserId(userId);
-//                    project.setId(++id);
-//                    project.setLabel(projectLabel);
-//                    project.setDescription("desc");
-//                    final long projectOrder = adapter.getItemCount()+1;
-//                    project.setOrder(projectOrder);
-//                    projectList.add(project);
-//
-//                    //databaseConnection.insertProject(project);
-//                    adapter.notifyDataSetChanged();
-//                    addListItem.getText().clear();
                 }
+            }
+        });
+
+        adapter.setOnItemClickListener(new ProjectAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                final Project project = projectList.getAllList().get(position);
+                final Intent intent = new Intent(MenuActivity2.this, ProjectTodoItemActivity2.class);
+
+                intent.putExtra(getString(R.string.ProjectId), project.getId());
+                intent.putExtra(getString(R.string.ProjectName), project.getName());
+                intent.putExtra(getString(R.string.token), token);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onRemoveItem(int position) {
+                removeProject(projects.get(position));
+            }
+
+            @Override
+            public void onUpdateItem(final Project fromProject, final Project toProject) {
+                updateProject(fromProject, toProject);
             }
         });
 
@@ -301,9 +279,54 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
 
     }
 
+    private void updateProject(final Project fromProject, final Project toProject) {
+        final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/",token);
+
+        projectService.update(fromProject, new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(String response) {
+                showSnackBar("Project Updated");
+            }
+
+            @Override
+            public void onFailure(String response) {
+                showSnackBar("Project Updation Failed");
+            }
+        });
+
+        projectService.update(toProject, new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(String response) {
+                showSnackBar("Project Updated");
+            }
+
+            @Override
+            public void onFailure(String response) {
+                showSnackBar("Project Updation Failed");
+            }
+        });
+    }
+
+    private void removeProject(Project project) {
+        final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/",token);
+
+        projectService.delete(project.getId(), new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(String response) {
+                showSnackBar("Project Deleted");
+            }
+
+            @Override
+            public void onFailure(String response) {
+                showSnackBar("Project Deletion Failure");
+            }
+        });
+    }
+
     public void applyFontToAllLayout() {
         FontManager.applyFontToView(this, getWindow().getDecorView().findViewById(android.R.id.content));
     }
+
     private float selectTextSize(final String fontSize) {
         switch (fontSize) {
             case "Small":
@@ -324,6 +347,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     private void showSnackBar(final String message) {
         Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
     }
+
     private Typeface selectTypeface(final String fontName) {
         Typeface typeface;
         switch (fontName) {
@@ -348,23 +372,11 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         return typeface;
     }
 
-//    private void loadProjectsFromDataBase(final Long userId) {
-//        projects = databaseConnection.getAllProjectList();
-//        List<Project> filterProject = new ArrayList<>();
-//
-//        for (Project project : projects) {
-//            if (project.getUserId().equals(userId)) {
-//                filterProject.add(project);
-//            }
-//        }
-//        adapter.clearProjects();
-//        adapter.addProjects(filterProject);
-//    }
+    @SuppressLint("NotifyDataSetChanged")
     private void loadProjectsFromDataBase() {
-        final TodoProjectService projectService = new TodoProjectService("http://192.168.1.109:8080/",token);
+        final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/",token);
 
         projectService.getAll(new AuthenticationService.ApiResponseCallBack() {
-            @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onSuccess(String response) {
                 projects = parseProjectsFromResponse(response);
@@ -380,6 +392,40 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         });
     }
 
+    private void getUserDetail() {
+        final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.109:8080/",token);
+
+        authenticationService.getUserDetail(new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(String response) {
+                setUserDetail(response);
+            }
+
+            @Override
+            public void onFailure(String response) {
+                showSnackBar(response);
+            }
+        });
+    }
+
+    private void setUserDetail(String response) {
+        try {
+            final JSONObject jsonObject = new JSONObject(response);
+            final JSONObject data = jsonObject.getJSONObject("data");
+
+            user.setId(data.getString("_id"));
+            user.setName(data.getString("name"));
+            user.setTitle(data.getString("title"));
+            user.setEmail(data.getString("email"));
+            userName.setText(user.getName());
+            userTitle.setText(user.getTitle());
+            profileIcon.setText(user.setProfileIcon());
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private List<Project> parseProjectsFromResponse(String jsonResponse) {
         List<Project> parsedProjects = new ArrayList<>();
 
@@ -390,16 +436,24 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
 
             for (int i = 0; i < data.length(); i++) {
                  JSONObject projectObject = data.getJSONObject(i);
-//                 String projectId = projectObject.getString("id");
-                 String projectName = projectObject.getString("name");
-                 String projectDescription = projectObject.getString("description");
+                final JSONObject additionalAttribute = projectObject.getJSONObject("additional_attributes");
 
-                 Project project = new Project();
-//                 project.setId(projectId);
-                 project.setName(projectName);
-                 project.setDescription(projectDescription);
-                 parsedProjects.add(project);
-             }
+                if (user.getId().equals(additionalAttribute.getString("created_by"))) {
+                    final Project project = new Project();
+
+                    project.setId(projectObject.getString("_id"));
+                    project.setName(projectObject.getString("name"));
+                    project.setDescription(projectObject.getString("description"));
+                    parsedProjects.add(project);
+                }
+            }
+//            Collections.sort(parsedProjects, new Comparator<Project>() {
+//                @Override
+//                public int compare(final Project project1, final Project project2) {
+//                    return Long.compare(project1.getOrder(), project2.getOrder());
+//                }
+//            });
+
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
@@ -413,11 +467,9 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             final User user = new User();
 
-            userId = data.getLongExtra(String.valueOf(R.string.Id),0);
             user.setName(data.getStringExtra(String.valueOf(R.string.UserName)));
             user.setTitle(data.getStringExtra(String.valueOf(R.string.UserTitle)));
             userName.setText(user.getName());
-//            userName.setText(userCredentials.getName());
             userTitle.setText(user.getTitle());
             profileIcon.setText(user.setProfileIcon());
         }
@@ -445,36 +497,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
      */
     @Override
     public void showAddNameDialog() {
-        final EditText editText = new EditText(this);
 
-        editText.setInputType(InputType.TYPE_CLASS_TEXT);
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.addList)
-                .setView(editText)
-                .setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
-                    @SuppressLint("NotifyDataSetChanged")
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int which) {
-                        final String projectName = editText.getText().toString();
-
-                        if (! projectName.isEmpty()) {
-                            final Project project = new Project();
-                            project.setUserId(userId);
-                           // project.setId(++id);
-                            project.setName(projectName);
-                            final long projectOrder = adapter.getItemCount()+1;
-
-                            project.setOrder(projectOrder);
-                            projectList.add(project);
-                            databaseConnection.insertProject(project);
-                            adapter.notifyDataSetChanged();
-
-                        }
-                    }
-                })
-                .setNegativeButton(R.string.cancel, null)
-                .create()
-                .show();
     }
 
 

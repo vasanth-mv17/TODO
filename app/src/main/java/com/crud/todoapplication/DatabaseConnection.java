@@ -315,7 +315,7 @@ public class DatabaseConnection extends SQLiteOpenHelper {
         final SQLiteDatabase db = this.getWritableDatabase();
         final ContentValues values = new ContentValues();
 
-        values.put(COLUMN_LABEL, todoItem.getLabel());
+        values.put(COLUMN_LABEL, todoItem.getName());
         values.put(COLUMN_project_ID, todoItem.getParentId());
         values.put(COLUMN_TODO_ORDER, todoItem.getOrder());
         values.put(COLUMN_STATUS, String.valueOf(todoItem.getStatus()));
@@ -407,12 +407,12 @@ public class DatabaseConnection extends SQLiteOpenHelper {
                     final Long itemId = cursor.getLong(cursor.getColumnIndex(COLUMN_TODO_ID));
                     final String itemName = cursor.getString(cursor.getColumnIndex(COLUMN_LABEL));
                     final String status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS));
-                    final TodoItem todoItem = new TodoItem(itemName);
+                    //final TodoItem todoItem = new TodoItem(itemName);
 
-                    todoItem.setId(itemId);
-                    todoItem.setParentId(projectId);
-                    todoItem.setStatus(TodoItem.Status.valueOf(status.toUpperCase()));
-                    todoItemList.add(todoItem);
+//                    todoItem.setId(itemId);
+//                    todoItem.setParentId(projectId);
+//                    todoItem.setStatus(TodoItem.Status.valueOf(status.toUpperCase()));
+//                    todoItemList.add(todoItem);
                 } while (cursor.moveToNext());
             }
         }

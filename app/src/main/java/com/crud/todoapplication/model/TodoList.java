@@ -30,7 +30,7 @@ public class TodoList {
         return todoItems;
     }
 
-    public List<TodoItem> getAllItems(final Long parentId) {
+    public List<TodoItem> getAllItems(final String parentId) {
         return todoItems.stream().filter(todoItem -> todoItem.getParentId().equals(parentId))
                 .collect(Collectors.toList());
     }
