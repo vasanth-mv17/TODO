@@ -73,9 +73,9 @@ public class LoginActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(email) || TextUtils.isEmpty(pass)) {
                     showSnackBar(String.valueOf(R.string.All_fields_are_required));
                 } else {
-                    final String hashPassword = MD5Helper.md5(pass);
+                   // final String hashPassword = MD5Helper.md5(pass);
                     final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.109:8080/");
-                    authenticationService.login(email, hashPassword, new AuthenticationService.ApiResponseCallBack() {
+                    authenticationService.login(email, pass, new AuthenticationService.ApiResponseCallBack() {
                         @Override
                         public void onSuccess(String response) {
                             showSnackBar(String.valueOf(R.string.Login_success));

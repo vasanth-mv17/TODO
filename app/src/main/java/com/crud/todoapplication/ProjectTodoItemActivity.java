@@ -1,10 +1,8 @@
 package com.crud.todoapplication;
 
 import android.annotation.SuppressLint;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,7 +20,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.crud.todoapplication.controller.ProjectListController;
@@ -322,7 +319,7 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
         List<TodoItem> searchCheckedItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
-            if (todoItem.isChecked() && todoItem.getLabel().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
+            if (todoItem.isChecked() && todoItem.getName().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
                 searchCheckedItems.add(todoItem);
             }
         }
@@ -344,7 +341,7 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
         List<TodoItem> searchUnCheckedItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
-            if (!todoItem.isChecked() && todoItem.getLabel().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
+            if (!todoItem.isChecked() && todoItem.getName().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
                 searchUnCheckedItems.add(todoItem);
             }
         }
@@ -366,7 +363,7 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
         List<TodoItem> searchAllItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
-            if (todoItem.getLabel().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
+            if (todoItem.getName().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
                 searchAllItems.add(todoItem);
             }
         }
@@ -401,7 +398,7 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
             }
         });
         tableRow.addView(checkBox);
-        label.setText(todoItem.getLabel());
+        label.setText(todoItem.getName());
         tableRow.addView(label);
         final ImageView closeIcon = new ImageView(ProjectTodoItemActivity.this);
 
@@ -426,9 +423,9 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
     public void addNewTodoItem() {
         final String todoLabel = editText.getText().toString();
         if (!todoLabel.isEmpty()) {
-            final TodoItem todoItem = new TodoItem(todoLabel);
-            todoItem.setParentId(selectedProjectId);
-            todoItem.setId(++id);
+            final TodoItem todoItem = new TodoItem();
+            //todoItem.setParentId(selectedProjectId);
+            //todoItem.setId(++id);
             todoItem.setStatus(TodoItem.Status.UNCHECKED);
             todoList.add(todoItem);
             todoItems = todoList.getAllItems();
@@ -521,7 +518,7 @@ public class ProjectTodoItemActivity extends AppCompatActivity implements Projec
     private void removeItem(final TableRow tableRow, final TodoItem todoItem) {
         int previousTotalPageCount = (int) Math.ceil((double) todoItems.size() / pageCapacity);
         tableLayout.removeView(tableRow);
-        todoList.remove(todoItem.getId());
+        //todoList.remove(todoItem.getId());
 
         todoItems = todoList.getAllItems();
         int totalPageCount = (int) Math.ceil((double) todoItems.size() / pageCapacity);

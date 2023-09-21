@@ -2,7 +2,6 @@ package com.crud.todoapplication;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
@@ -27,7 +26,14 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
     private Context context;
     private DatabaseConnection databaseConnection;
     private TodoList todoList;
-   // private OnItemClickListener listener;
+    private OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+
+        void onCheckBoxClick(TodoItem todoItem);
+        void onCloseIconClick(TodoItem todoItem);
+        void onItemUpdate(TodoItem fromItem, TodoItem toItem);
+    }
 
     public TodoItemAdapter(List<TodoItem> todoItems, Context context, DatabaseConnection databaseConnection, TodoList todoList) {
         this.todoItems = todoItems;
@@ -44,21 +50,21 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
         return new ViewHolder(view);
     }
 
-//    public void setOnClickListener(final OnItemClickListener listener) {
-//        this.listener = listener;
-//    }
+    public void setOnClickListener(final OnItemClickListener listener) {
+        this.listener = listener;
+    }
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TodoItem todoItem = todoItems.get(position);
         Typeface typeface = FontManager.getCurrentTypeface();
         //holder.bind(todoItem,listener);
         holder.itemText.setTypeface(typeface);
-        holder.bind(todoItem, databaseConnection);
+        holder.bind(todoItem, listener);
 
-        holder.removeButton.setOnClickListener(v -> {
-            todoItems.remove(position);
-            notifyDataSetChanged();
-        });
+//        holder.removeButton.setOnClickListener(v -> {
+//            todoItems.remove(position);
+//            notifyDataSetChanged();
+//        });
     }
 
     @Override
@@ -84,9 +90,10 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
         Collections.swap(todoItems, fromPosition, toPosition);
         fromList.setOrder((long) (toPosition + 1));
         toList.setOrder((long) (fromPosition + 1));
+        listener.onItemUpdate(fromList, toList);
         notifyItemMoved(fromPosition, toPosition);
-        databaseConnection.updateTodoOrder(fromList);
-        databaseConnection.updateTodoOrder(toList);
+//        databaseConnection.updateTodoOrder(fromList);
+//        databaseConnection.updateTodoOrder(toList);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -99,39 +106,54 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
             checkBox = itemView.findViewById(R.id.checkBox);
             itemText = itemView.findViewById(R.id.itemText);
             removeButton = itemView.findViewById(R.id.removeButton);
-        }
 
-        public void bind(final TodoItem todoItem, final DatabaseConnection databaseConnection) {
-            itemText.setText(todoItem.getLabel());
-            checkBox.setChecked(todoItem.getStatus() == TodoItem.Status.CHECKED);
-            itemText.setTextColor(todoItem.getStatus() == TodoItem.Status.CHECKED ? Color.GRAY : Color.BLACK);
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                final int position = getAdapterPosition();
 
-            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                if (position != RecyclerView.NO_POSITION) {
+                    final TodoItem todoItem = todoItems.get(position);
+
+                    todoItem.setChecked();
+                    todoItem.setStatus(isChecked ? TodoItem.Status.UNCHECKED
+                            : TodoItem.Status.CHECKED);
+                    itemText.setTextColor(todoItem.getStatus() == TodoItem.Status.CHECKED
+                            ? Color.GRAY : Color.BLACK);
+                    listener.onCheckBoxClick(todoItem);
+                }
+            });
+
+            removeButton.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    final int position = todoItems.indexOf(todoItem);
+                public void onClick(View v) {
+                    final int position = getAdapterPosition();
 
-                    if (-1 != position) {
-                        final TodoItem updatedItem = todoItems.get(position);
+                    if (position != RecyclerView.NO_POSITION) {
+                        final TodoItem todoItem = todoItems.get(position);
 
-                        updatedItem.setStatus(updatedItem.getStatus() == TodoItem.Status.CHECKED ? TodoItem.Status.UNCHECKED : TodoItem.Status.CHECKED);
-                        databaseConnection.update(todoItem);
-                        notifyItemChanged(position);
+                        todoItems.remove(todoItem);
+                        notifyItemRemoved(position);
+                        listener.onCloseIconClick(todoItem);
                     }
                 }
             });
+        }
+
+        public void bind(final TodoItem todoItem, final OnItemClickListener listener) {
+            itemText.setText(todoItem.getName());
+            checkBox.setChecked(todoItem.getStatus() == TodoItem.Status.CHECKED);
+            itemText.setTextColor(todoItem.getStatus() == TodoItem.Status.CHECKED ? Color.GRAY : Color.BLACK);
+
+            checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    listener.onCheckBoxClick(todoItem);
+                }
+            });
+
             removeButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    final int position = todoItems.indexOf(todoItem);
-
-                    if (-1 != position) {
-                        final TodoItem removeItem = todoItems.get(position);
-
-                        todoList.remove(todoItem.getId());
-                        databaseConnection.delete(removeItem.getId());
-                        notifyItemChanged(position);
-                    }
+                    listener.onCloseIconClick(todoItem);
                 }
             });
         }

@@ -20,12 +20,23 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.crud.todoapplication.api.AuthenticationService;
+import com.crud.todoapplication.api.TodoItemService;
 import com.crud.todoapplication.controller.ProjectListController;
+import com.crud.todoapplication.model.Project;
 import com.crud.todoapplication.model.TodoItem;
 import com.crud.todoapplication.model.TodoList;
+import com.crud.todoapplication.model.User;
 import com.crud.todoapplication.service.ProjectView;
+import com.google.android.material.snackbar.Snackbar;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -55,8 +66,9 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     private ImageButton addButton;
 
     private String selectedProjectName;
-    private Long selectedProjectId;
+    private String selectedProjectId;
     private TodoList todoList;
+    private User user;
     private DatabaseConnection databaseConnection;
     private com.crud.todoapplication.model.Filter filter;
     private ProjectListController projectListController;
@@ -69,6 +81,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     private int currentPage = 1;
     private int pageCapacity = 10;
     private static Long id = 0L;
+    private String token;
 
     /**
      * <p>
@@ -104,9 +117,11 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         projectListController = new ProjectListController(this);
-        selectedProjectId = getIntent().getLongExtra(String.valueOf(R.string.ProjectId), 0L);
-        selectedProjectName = getIntent().getStringExtra(String.valueOf(R.string.ProjectName));
+        selectedProjectId = getIntent().getStringExtra(getString(R.string.ProjectId));
+        selectedProjectName = getIntent().getStringExtra(getString(R.string.ProjectName));
+        token = getIntent().getStringExtra(getString(R.string.token));
         todoList = new TodoList();
+        user = new User();
         databaseConnection = new DatabaseConnection(this);
         filter = new com.crud.todoapplication.model.Filter();
 
@@ -115,7 +130,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         adapter = new TodoItemAdapter(todoItems, ProjectTodoItemActivity2.this, databaseConnection, todoList);
         androidx.recyclerview.widget.ItemTouchHelper.Callback callback = new ItemMoveHelper(adapter);
         androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper = new androidx.recyclerview.widget.ItemTouchHelper(callback);
-        loadTodoItemsFromDatabase(selectedProjectId);
+        loadTodoItemsFromDatabase();
         recyclerView.setAdapter(adapter);
         itemTouchHelper.attachToRecyclerView(recyclerView);
         checkedItems = new ArrayList<>();
@@ -151,6 +166,28 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             }
         });
 
+        adapter.setOnClickListener(new TodoItemAdapter.OnItemClickListener() {
+            @Override
+            public void onCheckBoxClick(TodoItem todoItem) {
+
+            }
+
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onCloseIconClick(TodoItem todoItem) {
+                removeTodoItem(todoItem);
+                todoItems.remove(todoItem);
+                adapter.notifyDataSetChanged();
+
+                updateRecyclerView();
+                updatePageNumber(pageNumber);
+            }
+
+            @Override
+            public void onItemUpdate(TodoItem fromItem, TodoItem toItem) {
+                updateItemOrder(fromItem, toItem);
+            }
+        });
 
         searchButton.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -182,7 +219,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
 
                 switch (selectedStatus) {
                     case ALL:
-                        todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
+                        //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
                         List<TodoItem> allItem = new ArrayList<>();
 
                         for (final TodoItem todoItem : todoItems) {
@@ -233,17 +270,11 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             public void onClick(View view) {
                 if (currentPage > 1) {
                     currentPage--;
-                    updateRecyclerView();
+                    loadTodoItemsFromDatabase();
                     updatePageNumber(pageNumber);
                 }
 
-                if (currentPage == 1) {
-                    previousPageButton.setEnabled(false);
-                    previousPageButton.setColorFilter(Color.GRAY);
-                } else {
-                    previousPageButton.setEnabled(true);
-                    previousPageButton.setColorFilter(null);
-                }
+
             }
         });
 
@@ -252,16 +283,8 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             public void onClick(View view) {
                 if ((currentPage * pageCapacity) < todoItems.size()) {
                     currentPage++;
-                    updateRecyclerView();
+                    loadTodoItemsFromDatabase();
                     updatePageNumber(pageNumber);
-                }
-
-                if (currentPage == 1) {
-                    previousPageButton.setEnabled(false);
-                    previousPageButton.setColorFilter(Color.GRAY);
-                } else {
-                    previousPageButton.setEnabled(true);
-                    previousPageButton.setColorFilter(null);
                 }
             }
         });
@@ -300,6 +323,47 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         applyFontToAllLayout();
     }
 
+    private void updateItemOrder(TodoItem fromItem, TodoItem toItem) {
+        final TodoItemService itemService = new TodoItemService("http://192.168.1.109:8080/", token);
+
+        itemService.update(fromItem, new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(final String responseBody) {}
+
+            @Override
+            public void onFailure(final String errorMessage) {
+                showSnackBar(errorMessage);
+            }
+        });
+        itemService.update(toItem, new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(String responseBody) {}
+
+            @Override
+            public void onFailure(String errorMessage) {
+                showSnackBar(errorMessage);
+            }
+        });
+    }
+
+
+    private void removeTodoItem(final TodoItem todoItem) {
+        final TodoItemService itemService = new TodoItemService("http://192.168.1.109:8080/", token);
+
+        itemService.delete(todoItem.getId(), new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(String responseBody) {
+                showSnackBar("Removed");
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                showSnackBar(errorMessage);
+            }
+        });
+    }
+
+
     public void applyFontToAllLayout() {
         FontManager.applyFontToView(this, getWindow().getDecorView().findViewById(android.R.id.content));
     }
@@ -316,16 +380,79 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     }
 
 
-    private void loadTodoItemsFromDatabase(final Long selectedProjectId) {
-        todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
+//    private void loadTodoItemsFromDatabase(final Long selectedProjectId) {
+//        //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
+//
+//        if (null != todoItems) {
+//            adapter.clearProjects();
+//            adapter.addProjects(todoItems);
+//            updatePageNumber(pageNumber);
+//        }
+//
+//        adapter.updateTodoItems(todoItems);
+//    }
 
-        if (null != todoItems) {
-            adapter.clearProjects();
-            adapter.addProjects(todoItems);
-            updatePageNumber(pageNumber);
+    private void loadTodoItemsFromDatabase() {
+        final TodoItemService todoItemService = new TodoItemService("http://192.168.1.109:8080/",token);
+
+        todoItemService.getAllItem(new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(String response) {
+                todoItems = parseItemFromResponse(response);
+
+                if (!todoItems.isEmpty()) {
+                    todoList.setAllItems(todoItems);
+                    updateRecyclerView();
+                    updatePageNumber(pageNumber);
+                } else {
+                    pageNumber.setVisibility(View.GONE);
+                    nextPageButton.setVisibility(View.GONE);
+                    previousPageButton.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onFailure(String response) {
+                showSnackBar(response);
+            }
+        });
+    }
+
+    private List<TodoItem> parseItemFromResponse(String response) {
+        List<TodoItem> parsedProjects = new ArrayList<>();
+
+        try {
+            final JSONObject responseJson = new JSONObject(response);
+            final JSONArray data = responseJson.getJSONArray(getString(R.string.data));
+
+
+            for (int i = 0; i < data.length(); i++) {
+                JSONObject projectObject = data.getJSONObject(i);
+
+
+                if (null != selectedProjectId && selectedProjectId.equals(projectObject.getString("project_id"))) {
+                    final TodoItem todoItem = new TodoItem();
+
+                    todoItem.setId(projectObject.getString("_id"));
+                    todoItem.setParentId(selectedProjectId);
+                    todoItem.setName(projectObject.getString("name"));
+                    todoItem.setOrder((long) projectObject.getInt("sort_order"));
+                    parsedProjects.add(todoItem);
+                }
+            }
+            Collections.sort(parsedProjects, new Comparator<TodoItem>() {
+                @Override
+                public int compare(final TodoItem item1, final TodoItem item2) {
+                    return Long.compare(item1.getOrder(), item2.getOrder());
+                }
+            });
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
 
-        adapter.updateTodoItems(todoItems);
+        return parsedProjects;
+
     }
 
     /**
@@ -335,7 +462,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      *
      */
     private void displayCheckedItems() {
-        todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
+        //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
         List<TodoItem> checkedItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
@@ -359,7 +486,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      *
      */
     private void displayUncheckedItems() {
-        todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
+        //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
         List<TodoItem> unCheckedItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
@@ -384,11 +511,11 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      */
     public void filterAndDisplayItems(final String query) {
         filter.setSearchAttribute(query);
-        todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
+        //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
         List<TodoItem> searchAllItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
-            if (todoItem.getLabel().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
+            if (todoItem.getName().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
                 searchAllItems.add(todoItem);
             }
         }
@@ -405,18 +532,53 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     public void addNewTodoItem() {
         final String todoLabel = editText.getText().toString();
         if (!todoLabel.isEmpty()) {
-            final TodoItem todoItem = new TodoItem(todoLabel);
+            final TodoItem todoItem = new TodoItem();
             final long itemOrder = adapter.getItemCount() + 1;
+            final TodoItemService todoItemService = new TodoItemService("http://192.168.1.109:8080/",token);
 
+            todoItem.setName(todoLabel);
             todoItem.setParentId(selectedProjectId);
-            todoItem.setId(++id);
-            todoItem.setOrder(itemOrder);
             todoItem.setStatus(TodoItem.Status.UNCHECKED);
-            todoList.add(todoItem);
+            todoItem.setOrder(itemOrder);
 
-            databaseConnection.insertTodo(todoItem);
-            adapter.notifyDataSetChanged();
-            todoItems = todoList.getAllItems(selectedProjectId);
+            todoItemService.create(todoItem.getName(), selectedProjectId, new AuthenticationService.ApiResponseCallBack() {
+                @Override
+                public void onSuccess(String response) {
+                    showSnackBar(getString(R.string.added_successful));
+                    todoList.add(todoItem);
+                    todoItems = todoList.getAllItems(selectedProjectId);
+
+                    pageNumber.setVisibility(View.VISIBLE);
+                    previousPageButton.setVisibility(View.VISIBLE);
+                    nextPageButton.setVisibility(View.VISIBLE);
+//                    adapter.addTodoItems(todoItems);
+                    adapter.updateTodoItems(todoItems);
+
+
+                }
+
+                @Override
+                public void onFailure(String response) {
+                    showSnackBar(response);
+                }
+            });
+
+
+
+
+
+
+//            final long itemOrder = adapter.getItemCount() + 1;
+//
+//            todoItem.setParentId(selectedProjectId);
+//            todoItem.setId(++id);
+//            todoItem.setOrder(itemOrder);
+//            todoItem.setStatus(TodoItem.Status.UNCHECKED);
+//            todoList.add(todoItem);
+//
+//            databaseConnection.insertTodo(todoItem);
+//            adapter.notifyDataSetChanged();
+//            todoItems = todoList.getAllItems(selectedProjectId);
 //            int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
 
 //            if (1 == todoItems.size() % pageCapacity && currentPage == totalPageCount - 1) {
@@ -430,9 +592,10 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             nextPageButton.setEnabled(true);
             nextPageButton.setColorFilter(null);
 
+            editText.getText().clear();
             updateRecyclerView();
             updatePageNumber(pageNumber);
-            editText.getText().clear();
+
 
         }
     }
@@ -468,7 +631,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     private void removeItem(final TableRow tableRow, final TodoItem todoItem) {
         int previousTotalPageCount = (int) Math.ceil((double) todoItems.size() / pageCapacity);
         tableLayout.removeView(tableRow);
-        todoList.remove(todoItem.getId());
+        //todoList.remove(todoItem.getId());
 
         todoItems = todoList.getAllItems();
         int totalPageCount = (int) Math.ceil((double) todoItems.size() / pageCapacity);
@@ -492,5 +655,9 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
 
             }
         }
+    }
+
+    private void showSnackBar(final String message) {
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
     }
 }
