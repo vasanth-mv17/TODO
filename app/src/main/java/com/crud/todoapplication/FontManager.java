@@ -35,24 +35,17 @@ public class FontManager {
     }
 
     public static void applyTextSizeToView(View view) {
-        if (view instanceof ViewGroup) {
-            ViewGroup viewGroup = (ViewGroup) view;
+
+        if (view instanceof TextView) {
+            ((TextView) view).setTextSize(TypedValue.COMPLEX_UNIT_PX, currentFontSize);
+        } else if (view instanceof ViewGroup) {
+            final ViewGroup viewGroup = (ViewGroup) view;
 
             for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                View child = viewGroup.getChildAt(i);
+                final View childView = viewGroup.getChildAt(i);
 
-                if (child instanceof TextView) {
-                    TextView textView = (TextView) child;
-                    textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, currentFontSize);
-                }
-
-                if (child instanceof ViewGroup) {
-                    applyTextSizeToView(child);
-                }
+                applyTextSizeToView(childView);
             }
-        } else if (view instanceof TextView) {
-            TextView textView = (TextView) view;
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, currentFontSize);
         }
     }
 

@@ -15,6 +15,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -35,6 +36,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -62,6 +65,10 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     private TextView userTitle;
     private String token;
     private int currentTheme = R.style.Green;
+    private RelativeLayout toolBar;
+    private RelativeLayout sideNavBar;
+    private ImageButton addList;
+
 
     /**
      * <p>
@@ -70,7 +77,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
      *
      * @param savedInstanceState Refers the saved instance of the state
      */
-    @SuppressLint("MissingInflatedId")
+    @SuppressLint({"MissingInflatedId"})
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,33 +123,16 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         });
 
         final EditText addListItem = findViewById(R.id.addListItem);
-        final ImageButton addList = findViewById(R.id.addList);
+        addList = findViewById(R.id.addList);
+
         addList.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("NotifyDataSetChanged")
+
             @Override
             public void onClick(View view) {
                 final String projectLabel = addListItem.getText().toString();
 
                 if (!projectLabel.isEmpty()) {
-                    final Project project = new Project();
-                    final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/",token);
-
-                    project.setName(projectLabel);
-                    project.setDescription("desc");
-                    projectList.add(project);
-                    projectService.create(project, new AuthenticationService.ApiResponseCallBack() {
-                        @Override
-                        public void onSuccess(final String responseBody) {
-                            showSnackBar(getString(R.string.added_successful));
-                            adapter.notifyDataSetChanged();
-                        }
-
-                        @Override
-                        public void onFailure(final String errorMessage) {
-                            showSnackBar(errorMessage);
-                        }
-                    });
-
+                    addProject(projectLabel);
                     addListItem.setText("");
                 }
             }
@@ -152,12 +142,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
             @Override
             public void onItemClick(int position) {
                 final Project project = projectList.getAllList().get(position);
-                final Intent intent = new Intent(MenuActivity2.this, ProjectTodoItemActivity2.class);
-
-                intent.putExtra(getString(R.string.ProjectId), project.getId());
-                intent.putExtra(getString(R.string.ProjectName), project.getName());
-                intent.putExtra(getString(R.string.token), token);
-                startActivity(intent);
+                goToListPage(project);
             }
 
             @Override
@@ -171,8 +156,8 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
             }
         });
 
+        getSystemSettings();
         final ImageButton setting = findViewById(R.id.setting_button);
-
         setting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -229,8 +214,8 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         });
 
         final Spinner themeSpinner = findViewById(R.id.theme_color);
-        final RelativeLayout toolBar = findViewById(R.id.toolbar_view);
-        final RelativeLayout sideNavBar = findViewById(R.id.sideNavMenu);
+        toolBar = findViewById(R.id.toolbar_view);
+        sideNavBar = findViewById(R.id.sideNavMenu);
 
         ArrayAdapter<CharSequence> themeAdapter = ArrayAdapter.createFromResource(
                 this,
@@ -244,22 +229,11 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         themeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String selectedTheme = adapterView.getItemAtPosition(i).toString();
+                final int selectedTheme = getColorResourceId(adapterView.getItemAtPosition(i)
+                        .toString());
 
-                switch (selectedTheme) {
-                    case "Default(Green)":
-                        addList.setBackgroundColor(getResources().getColor(R.color.Primary));
-                        toolBar.setBackgroundColor(getResources().getColor(R.color.Primary));
-                        sideNavBar.setBackgroundColor(getResources().getColor(R.color.Primary));
-                        FontManager.setCurrentColour(R.color.Primary);
-                        break;
-                    case "Purple":
-                        addList.setBackgroundColor(getResources().getColor(R.color.Secondary));
-                        toolBar.setBackgroundColor(getResources().getColor(R.color.Secondary));
-                        sideNavBar.setBackgroundColor(getResources().getColor(R.color.Secondary));
-                        FontManager.setCurrentColour(R.color.Secondary);
-                        break;
-                }
+                FontManager.setCurrentColour(selectedTheme);
+                applyTheme(selectedTheme);
             }
 
             @Override
@@ -277,6 +251,82 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
             }
         });
 
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void addProject(String projectLabel) {
+        final Project project = new Project();
+        final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/", token);
+
+        project.setName(projectLabel);
+        project.setDescription("desc");
+        projectList.add(project);
+        projectService.create(project, new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(final String responseBody) {
+                showSnackBar(getString(R.string.added_successful));
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(final String errorMessage) {
+                showSnackBar(errorMessage);
+            }
+        });
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void loadProjectsFromDataBase() {
+        final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/",token);
+
+        projectService.getAll(new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(String response) {
+                projects = getProjectsFromResponse(response);
+
+                adapter.clearProjects();
+                adapter.addProjects(projects);
+            }
+            @Override
+            public void onFailure(String response) {
+                showSnackBar(response);
+            }
+        });
+    }
+
+    private List<Project> getProjectsFromResponse(String jsonResponse) {
+        List<Project> parsedProjects = new ArrayList<>();
+
+        try {
+            final JSONObject responseJson = new JSONObject(jsonResponse);
+            final JSONArray data = responseJson.getJSONArray(getString(R.string.data));
+
+
+            for (int i = 0; i < data.length(); i++) {
+                JSONObject projectObject = data.getJSONObject(i);
+                final JSONObject additionalAttribute = projectObject.getJSONObject("additional_attributes");
+
+                if (user.getId().equals(additionalAttribute.getString("created_by"))) {
+                    final Project project = new Project();
+
+                    project.setId(projectObject.getString("_id"));
+                    project.setName(projectObject.getString("name"));
+                    project.setDescription(projectObject.getString("description"));
+                    parsedProjects.add(project);
+                }
+            }
+            Collections.sort(parsedProjects, new Comparator<Project>() {
+                @Override
+                public int compare(final Project project1, final Project project2) {
+                    return Long.compare(project1.getOrder(), project2.getOrder());
+                }
+            });
+
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+        return parsedProjects;
     }
 
     private void updateProject(final Project fromProject, final Project toProject) {
@@ -323,75 +373,6 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         });
     }
 
-    public void applyFontToAllLayout() {
-        FontManager.applyFontToView(this, getWindow().getDecorView().findViewById(android.R.id.content));
-    }
-
-    private float selectTextSize(final String fontSize) {
-        switch (fontSize) {
-            case "Small":
-                return getResources().getDimension(R.dimen.small_text_size);
-            case "Medium":
-                return getResources().getDimension(R.dimen.medium_text_size);
-            case "Large":
-                return getResources().getDimension(R.dimen.large_text_size);
-            default:
-                return getResources().getDimension(R.dimen.small_text_size);
-        }
-    }
-
-    private void applyTextSizeToTextViews() {
-        FontManager.applyTextSizeToView(findViewById(android.R.id.content).getRootView());
-    }
-
-    private void showSnackBar(final String message) {
-        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
-    }
-
-    private Typeface selectTypeface(final String fontName) {
-        Typeface typeface;
-        switch (fontName) {
-            case "Default":
-                typeface = ResourcesCompat.getFont(this, R.font.karla);
-                break;
-            case "Alata":
-                typeface = ResourcesCompat.getFont(this, R.font.alata);
-                break;
-            case "Amaranth":
-                typeface = ResourcesCompat.getFont(this, R.font.amaranth_bold);
-                break;
-            case "Anton":
-                typeface = ResourcesCompat.getFont(this, R.font.anton);
-                break;
-            case "Telex":
-                typeface = ResourcesCompat.getFont(this, R.font.telex);
-                break;
-            default:
-                typeface = ResourcesCompat.getFont(this, R.font.karla);
-        }
-        return typeface;
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private void loadProjectsFromDataBase() {
-        final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/",token);
-
-        projectService.getAll(new AuthenticationService.ApiResponseCallBack() {
-            @Override
-            public void onSuccess(String response) {
-                projects = parseProjectsFromResponse(response);
-
-                adapter.clearProjects();
-                adapter.addProjects(projects);
-            }
-
-            @Override
-            public void onFailure(String response) {
-
-            }
-        });
-    }
-
     private void getUserDetail() {
         final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.109:8080/",token);
 
@@ -426,39 +407,119 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         }
     }
 
-    private List<Project> parseProjectsFromResponse(String jsonResponse) {
-        List<Project> parsedProjects = new ArrayList<>();
+    private void getSystemSettings() {
+        final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.109:8080/", token);
 
-        try {
-            final JSONObject responseJson = new JSONObject(jsonResponse);
-            final JSONArray data = responseJson.getJSONArray(getString(R.string.data));
+        authenticationService.getSettingDetail(new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(String responseBody) {
 
+                try {
+                    final JSONObject responseJson = new JSONObject(responseBody);
+                    final JSONObject data = responseJson.getJSONObject(getString(R.string.data));
+                    final String fontName = data.getString("font_family");
+                    final int fontSize = data.getInt("font_size");
+                    final String color = data.getString("color");
 
-            for (int i = 0; i < data.length(); i++) {
-                 JSONObject projectObject = data.getJSONObject(i);
-                final JSONObject additionalAttribute = projectObject.getJSONObject("additional_attributes");
+                    FontManager.setCurrentTypeface(selectTypeface(fontName));
+                    FontManager.setCurrentFontSize(selectTextSize(String.valueOf(fontSize)));
+                    FontManager.setCurrentColour(getColorResourceId(color));
+                    applyFontToAllLayout();
+                    applyTextSizeToTextViews();
+                    applyTheme(FontManager.getCurrentColour());
 
-                if (user.getId().equals(additionalAttribute.getString("created_by"))) {
-                    final Project project = new Project();
-
-                    project.setId(projectObject.getString("_id"));
-                    project.setName(projectObject.getString("name"));
-                    project.setDescription(projectObject.getString("description"));
-                    parsedProjects.add(project);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
                 }
             }
-//            Collections.sort(parsedProjects, new Comparator<Project>() {
-//                @Override
-//                public int compare(final Project project1, final Project project2) {
-//                    return Long.compare(project1.getOrder(), project2.getOrder());
-//                }
-//            });
 
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+            @Override
+            public void onFailure(String errorMessage) {
+                showSnackBar(errorMessage);
+            }
+        });
+    }
+
+    public void applyFontToAllLayout() {
+        FontManager.applyFontToView(this, getWindow().getDecorView().findViewById(android.R.id.content));
+    }
+
+    private float selectTextSize(final String fontSize) {
+        switch (fontSize) {
+            case "Small":
+                return getResources().getDimension(R.dimen.small_text_size);
+            case "Medium":
+                return getResources().getDimension(R.dimen.medium_text_size);
+            case "Large":
+                return getResources().getDimension(R.dimen.large_text_size);
+            default:
+                return getResources().getDimension(R.dimen.small_text_size);
         }
+    }
 
-        return parsedProjects;
+    private void applyTheme(int selectedTheme) {
+//        switch (selectedTheme) {
+//            case "Default(Green)":
+//                addList.setBackgroundColor(getResources().getColor(R.color.Primary));
+//                toolBar.setBackgroundColor(getResources().getColor(R.color.Primary));
+//                sideNavBar.setBackgroundColor(getResources().getColor(R.color.Primary));
+//                FontManager.setCurrentColour(R.color.Primary);
+//                break;
+//            case "Purple":
+//                addList.setBackgroundColor(getResources().getColor(R.color.Secondary));
+//                toolBar.setBackgroundColor(getResources().getColor(R.color.Secondary));
+//                sideNavBar.setBackgroundColor(getResources().getColor(R.color.Secondary));
+//                FontManager.setCurrentColour(R.color.Secondary);
+//                break;
+//        }
+        final int selectedColor = ContextCompat.getColor(this, selectedTheme);
+
+        addList.setBackgroundColor(selectedColor);
+        toolBar.setBackgroundColor(selectedColor);
+        sideNavBar.setBackgroundColor(selectedColor);
+    }
+
+    private int getColorResourceId(final String color) {
+        switch (color) {
+            case "Default(Green)":
+                return R.color.Primary;
+            case "Purple":
+                return R.color.Secondary;
+            default:
+                return R.color.Primary;
+        }
+    }
+
+    private void applyTextSizeToTextViews() {
+        FontManager.applyTextSizeToView(getWindow().getDecorView().findViewById(android.R.id.content));
+    }
+
+    private void showSnackBar(final String message) {
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+    }
+
+    private Typeface selectTypeface(final String fontName) {
+        Typeface typeface;
+        switch (fontName) {
+            case "Default":
+                typeface = ResourcesCompat.getFont(this, R.font.karla);
+                break;
+            case "Alata":
+                typeface = ResourcesCompat.getFont(this, R.font.alata);
+                break;
+            case "Amaranth":
+                typeface = ResourcesCompat.getFont(this, R.font.amaranth_bold);
+                break;
+            case "Anton":
+                typeface = ResourcesCompat.getFont(this, R.font.anton);
+                break;
+            case "Telex":
+                typeface = ResourcesCompat.getFont(this, R.font.telex);
+                break;
+            default:
+                typeface = ResourcesCompat.getFont(this, R.font.roboto);
+        }
+        return typeface;
     }
 
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
@@ -482,10 +543,11 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
      * @param project Refers the projects for intent to activity
      */
     public void goToListPage(final Project project) {
-        final Intent intent = new Intent(MenuActivity2.this,ProjectTodoItemActivity.class);
+        final Intent intent = new Intent(MenuActivity2.this, ProjectTodoItemActivity2.class);
 
-        intent.putExtra(String.valueOf(R.string.ProjectId), project.getId());
-        intent.putExtra(String.valueOf(R.string.ProjectName), project.getName());
+        intent.putExtra(getString(R.string.ProjectId), project.getId());
+        intent.putExtra(getString(R.string.ProjectName), project.getName());
+        intent.putExtra(getString(R.string.token), token);
         startActivity(intent);
     }
 
@@ -513,7 +575,6 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
 //        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, todoList);
 //        nameListView.setAdapter(arrayAdapter);
     }
-
 }
 
 

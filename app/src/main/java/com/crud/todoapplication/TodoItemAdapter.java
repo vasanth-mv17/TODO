@@ -73,17 +73,6 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
     }
 
     public void onItemMove(final int fromPosition, final int toPosition) {
-//        if (fromPosition < toPosition) {
-//            for (int i = fromPosition; i < toPosition; i++) {
-//                Collections.swap(todoItems, i, i + 1);
-//            }
-//        } else {
-//            for (int i = fromPosition; i > toPosition; i--) {
-//                Collections.swap(todoItems, i, i - 1);
-//            }
-//        }
-//        notifyItemMoved(fromPosition, toPosition);
-
         final TodoItem fromList = todoItems.get(fromPosition);
         final TodoItem toList = todoItems.get(toPosition);
 
@@ -92,8 +81,6 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
         toList.setOrder((long) (fromPosition + 1));
         listener.onItemUpdate(fromList, toList);
         notifyItemMoved(fromPosition, toPosition);
-//        databaseConnection.updateTodoOrder(fromList);
-//        databaseConnection.updateTodoOrder(toList);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -114,11 +101,11 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
                     final TodoItem todoItem = todoItems.get(position);
 
                     todoItem.setChecked();
-                    todoItem.setStatus(isChecked ? TodoItem.Status.UNCHECKED
-                            : TodoItem.Status.CHECKED);
+                    todoItem.setStatus(isChecked ? TodoItem.Status.CHECKED
+                            : TodoItem.Status.UNCHECKED);
                     itemText.setTextColor(todoItem.getStatus() == TodoItem.Status.CHECKED
                             ? Color.GRAY : Color.BLACK);
-                    listener.onCheckBoxClick(todoItem);
+//                    listener.onCheckBoxClick(todoItem);
                 }
             });
 
@@ -139,8 +126,8 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
         }
 
         public void bind(final TodoItem todoItem, final OnItemClickListener listener) {
-            itemText.setText(todoItem.getName());
             checkBox.setChecked(todoItem.getStatus() == TodoItem.Status.CHECKED);
+            itemText.setText(todoItem.getName());
             itemText.setTextColor(todoItem.getStatus() == TodoItem.Status.CHECKED ? Color.GRAY : Color.BLACK);
 
             checkBox.setOnClickListener(new View.OnClickListener() {

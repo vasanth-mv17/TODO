@@ -29,4 +29,10 @@ public interface TodoApiService {
                                    @Field("sort_order") final int sortingOrder,
                                    @Field("project_id") final String projectId);
 
+    @FormUrlEncoded
+    @PUT("api/v1/item/{itemId}")
+    Call<ResponseBody> updateState(@Path("itemId") final String itemId,
+                                   @Field("is_completed") final boolean isCompleted,
+                                   @Field("project_id") final String projectId);
+
 }

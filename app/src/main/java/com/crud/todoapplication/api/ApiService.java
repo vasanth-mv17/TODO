@@ -36,5 +36,8 @@ public interface ApiService {
     @GET("api/v1/user/details")
     Call<ResponseBody> getUserDetail();
 
+    @GET("api/v1/user/system/settings")
+    Call<ResponseBody> getSystemSetting();
+
 }
 

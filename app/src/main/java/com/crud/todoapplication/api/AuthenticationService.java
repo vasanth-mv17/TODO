@@ -156,7 +156,43 @@ public class AuthenticationService {
         });
     }
 
-    
+    public void getSettingDetail(final ApiResponseCallBack callBack) {
+        final Call<ResponseBody> call = apiService.getSystemSetting();
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call,
+                                   @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    assert response.body() != null;
+
+                    try {
+                        callBack.onSuccess(response.body().string());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    try {
+                        assert response.errorBody() != null;
+                        final String errorBody = response.errorBody().string();
+                        final JSONObject jsonObject = new JSONObject(errorBody);
+                        final String message = jsonObject.getString("message");
+
+                        callBack.onFailure(message);
+                    } catch (IOException | JSONException message) {
+                        throw new RuntimeException(message);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                callBack.onFailure(t.getMessage());
+            }
+        });
+    }
+
+
     public interface ApiResponseCallBack {
         void onSuccess(String response);
         void onFailure(String response);

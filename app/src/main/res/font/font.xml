@@ -17,6 +17,9 @@
         app:font="@font/karla"/>
 
     <font app:fontStyle="normal"
+        app:font="@font/roboto"/>
+
+    <font app:fontStyle="normal"
         android:fontWeight="600"
         app:font="@font/belleza"/>
 
