@@ -22,9 +22,7 @@
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
-            android:exported="false" /> <!-- <activity -->
-        <!-- android:name=".MenuActivity" -->
-        <!-- android:exported="false" /> -->
+            android:exported="false" />
         <activity
             android:name=".MenuActivity2"
             android:exported="false" />
@@ -33,9 +31,7 @@
             android:exported="false" />
         <activity
             android:name=".ProjectTodoItemActivity2"
-            android:exported="false" /> <!-- <activity -->
-        <!-- android:name=".ProjectTodoItemActivity" -->
-        <!-- android:exported="false" /> -->
+            android:exported="false" />
         <activity
             android:name=".SplashActivity"
             android:exported="true">

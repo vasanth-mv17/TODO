@@ -169,7 +169,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         adapter.setOnClickListener(new TodoItemAdapter.OnItemClickListener() {
             @Override
             public void onCheckBoxClick(TodoItem todoItem) {
-
+                updateItemState(todoItem);
             }
 
             @SuppressLint("NotifyDataSetChanged")
@@ -219,7 +219,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
 
                 switch (selectedStatus) {
                     case ALL:
-                        //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
+                        todoItems = todoList.getAllItems(selectedProjectId);
                         List<TodoItem> allItem = new ArrayList<>();
 
                         for (final TodoItem todoItem : todoItems) {
@@ -323,6 +323,21 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         applyFontToAllLayout();
     }
 
+    private void updateItemState(TodoItem todoItem) {
+        final TodoItemService itemService = new TodoItemService("http://192.168.1.109:8080/", token);
+
+        itemService.updateState(todoItem, new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(String response) {
+                showSnackBar(response);
+            }
+
+            @Override
+            public void onFailure(String response) {
+                showSnackBar(response);
+            }
+        });
+    }
     private void updateItemOrder(TodoItem fromItem, TodoItem toItem) {
         final TodoItemService itemService = new TodoItemService("http://192.168.1.109:8080/", token);
 
@@ -337,7 +352,9 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         });
         itemService.update(toItem, new AuthenticationService.ApiResponseCallBack() {
             @Override
-            public void onSuccess(String responseBody) {}
+            public void onSuccess(String responseBody) {
+                showSnackBar(responseBody);
+            }
 
             @Override
             public void onFailure(String errorMessage) {
@@ -379,18 +396,6 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
 
     }
 
-
-//    private void loadTodoItemsFromDatabase(final Long selectedProjectId) {
-//        //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
-//
-//        if (null != todoItems) {
-//            adapter.clearProjects();
-//            adapter.addProjects(todoItems);
-//            updatePageNumber(pageNumber);
-//        }
-//
-//        adapter.updateTodoItems(todoItems);
-//    }
 
     private void loadTodoItemsFromDatabase() {
         final TodoItemService todoItemService = new TodoItemService("http://192.168.1.109:8080/",token);
@@ -435,6 +440,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
 
                     todoItem.setId(projectObject.getString("_id"));
                     todoItem.setParentId(selectedProjectId);
+                    todoItem.setStatus(projectObject.getBoolean("is_completed") ? TodoItem.Status.CHECKED : TodoItem.Status.UNCHECKED);
                     todoItem.setName(projectObject.getString("name"));
                     todoItem.setOrder((long) projectObject.getInt("sort_order"));
                     parsedProjects.add(todoItem);
@@ -463,6 +469,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      */
     private void displayCheckedItems() {
         //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
+        todoItems = todoList.getAllItems(selectedProjectId);
         List<TodoItem> checkedItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
@@ -487,6 +494,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      */
     private void displayUncheckedItems() {
         //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
+        todoItems = todoList.getAllItems(selectedProjectId);
         List<TodoItem> unCheckedItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
@@ -512,6 +520,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     public void filterAndDisplayItems(final String query) {
         filter.setSearchAttribute(query);
         //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
+        todoItems = todoList.getAllItems(selectedProjectId);
         List<TodoItem> searchAllItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
