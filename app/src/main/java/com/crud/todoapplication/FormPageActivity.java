@@ -11,8 +11,10 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.crud.todoapplication.api.AuthenticationService;
 import com.crud.todoapplication.model.Credentials;
 import com.crud.todoapplication.model.User;
+import com.google.android.material.snackbar.Snackbar;
 
 public class FormPageActivity extends AppCompatActivity {
 
@@ -23,6 +25,7 @@ public class FormPageActivity extends AppCompatActivity {
     private ImageButton saveButton;
     private ImageButton cancelButton;
     private User user;
+    private String token;
     private static Long id = 0L;
     private DatabaseConnection databaseConnection;
     private Credentials userCredentials;
@@ -39,19 +42,14 @@ public class FormPageActivity extends AppCompatActivity {
         user_name = findViewById(R.id.editTextText);
         user_title = findViewById(R.id.editTextText2);
         //user = databaseConnection.getUserProfile();
+        token = getIntent().getStringExtra(getString(R.string.token));
         user = new User();
         userCredentials = new Credentials();
 
-        if (null != user) {
-//            user_name.setText(userCredentials.getName());
-            user_name.setText(user.getName());
-            user_title.setText(user.getTitle());
-            profileIcon.setText(user.setProfileIcon());
-        }
-//        else {
-//            user = new User();
-//            user.setName(getIntent().getStringExtra(String.valueOf(R.string.Name)));
-//            user.setTitle(getIntent().getStringExtra(String.valueOf(R.string.Title)));
+//        if (null != user) {
+//            user_name.setText(user.getName());
+//            user_title.setText(user.getTitle());
+//            profileIcon.setText(user.setProfileIcon());
 //        }
 
         backMenuButton.setOnClickListener(new View.OnClickListener() {
@@ -67,18 +65,34 @@ public class FormPageActivity extends AppCompatActivity {
             public void onClick(View view) {
                 final Intent resultantIntent = new Intent();
 
-                user.setName(user_name.getText().toString());
-                user.setTitle(user_title.getText().toString());
-                profileIcon.setText(user.setProfileIcon());
-                databaseConnection.insertUser(user);
+                if (null != user) {
+                    final String name = null != user.getName() ? user.getName() : "";
+                    final String title = null != user.getTitle() ? user.getTitle() : "";
 
-                //user.setId(++id);
-                //System.out.println(user.getId());
-                //resultantIntent.putExtra(String.valueOf(R.string.Id), user.getId());
-                resultantIntent.putExtra(String.valueOf(R.string.UserName), user.getName());
-                resultantIntent.putExtra(String.valueOf(R.string.UserTitle), user.getTitle());
-                setResult(RESULT_OK, resultantIntent);
-                finish();
+                    if (!name.equals(user_name.getText().toString()) || !title.equals(user_title.getText().toString())) {
+                        user.setName(user_name.getText().toString());
+                        user.setTitle(user_title.getText().toString());
+                        profileIcon.setText(user.setProfileIcon());
+
+                        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080), token );
+
+                        authenticationService.UpdateUserDetail(user, new AuthenticationService.ApiResponseCallBack() {
+                            @Override
+                            public void onSuccess(String response) {
+                                showSnackBar(response);
+                                resultantIntent.putExtra(String.valueOf(R.string.UserName), user.getName());
+                                resultantIntent.putExtra(String.valueOf(R.string.UserTitle), user.getTitle());
+                                setResult(RESULT_OK, resultantIntent);
+                                finish();
+                            }
+
+                            @Override
+                            public void onFailure(String response) {
+                                showSnackBar(response);
+                            }
+                        });
+                    }
+                }
             }
         });
 
@@ -107,5 +121,8 @@ public class FormPageActivity extends AppCompatActivity {
     }
     private void applyTextSizeToTextViews() {
         FontManager.applyTextSizeToView(findViewById(android.R.id.content).getRootView());
+    }
+    private void showSnackBar(final String message) {
+        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
     }
 }

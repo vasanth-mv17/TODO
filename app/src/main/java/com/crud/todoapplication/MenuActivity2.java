@@ -64,11 +64,16 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     private TextView userName;
     private TextView userTitle;
     private String token;
+    private Spinner fontFamilySpinner;
+    private Spinner themeSpinner;
+    private Spinner fontSizeSpinner;
     private int currentTheme = R.style.Green;
     private RelativeLayout toolBar;
     private RelativeLayout sideNavBar;
     private ImageButton addList;
-
+    private int fontFamilyFlag;
+    private int fontSizeFlag;
+    private int themeFlag;
 
     /**
      * <p>
@@ -118,6 +123,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
             public void onClick(View view) {
                 final Intent intent = new Intent(MenuActivity2.this, FormPageActivity.class);
 
+                intent.putExtra(getString(R.string.token), token);
                 startActivityIfNeeded(intent, REQUEST_CODE);
             }
         });
@@ -164,7 +170,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
                 drawerLayout.openDrawer(GravityCompat.END);
             }
         });
-        final Spinner fontFamilySpinner = findViewById(R.id.fontFamily1);
+        fontFamilySpinner = findViewById(R.id.fontFamily1);
 
         ArrayAdapter<CharSequence> fontFamilyAdapter = ArrayAdapter.createFromResource(
                 this,
@@ -177,17 +183,22 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         fontFamilySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                final String selectedFontFamily = adapterView.getItemAtPosition(i).toString();
-                final Typeface typeface = selectTypeface(selectedFontFamily);
+                if (!(fontFamilyFlag == 0)) {
+                    final String selectedFontFamily = adapterView.getItemAtPosition(i).toString();
+                    final Typeface typeface = selectTypeface(selectedFontFamily);
 
-                FontManager.setCurrentTypeface(typeface);
-                applyFontToAllLayout();
+                    FontManager.setCurrentTypeface(typeface);
+                    applyFontToAllLayout();
+                    updateSystemSettings();
+                } else {
+                    fontFamilyFlag = 1;
+                }
             }
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-        final Spinner fontSizeSpinner = findViewById(R.id.font_size);
+        fontSizeSpinner = findViewById(R.id.font_size);
 
         ArrayAdapter<CharSequence> fontSizeAdapter = ArrayAdapter.createFromResource(
                 this,
@@ -201,11 +212,16 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         fontSizeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String selectedFontSize = adapterView.getItemAtPosition(i).toString();
-                float textSize = selectTextSize(selectedFontSize);
+               if (!(fontSizeFlag == 0)) {
+                   String selectedFontSize = adapterView.getItemAtPosition(i).toString();
+                   float textSize = selectTextSize(selectedFontSize);
 
-                FontManager.setCurrentFontSize(textSize);
-                applyTextSizeToTextViews();
+                   FontManager.setCurrentFontSize(textSize);
+                   applyTextSizeToTextViews();
+                   updateSystemSettings();
+               } else {
+                   fontSizeFlag = 1;
+               }
             }
 
             @Override
@@ -213,7 +229,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
             }
         });
 
-        final Spinner themeSpinner = findViewById(R.id.theme_color);
+        themeSpinner = findViewById(R.id.theme_color);
         toolBar = findViewById(R.id.toolbar_view);
         sideNavBar = findViewById(R.id.sideNavMenu);
 
@@ -229,11 +245,16 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         themeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                final int selectedTheme = getColorResourceId(adapterView.getItemAtPosition(i)
-                        .toString());
+                if (!(themeFlag == 0)) {
+                    final int selectedTheme = getColorResourceId(adapterView.getItemAtPosition(i)
+                            .toString());
 
-                FontManager.setCurrentColour(selectedTheme);
-                applyTheme(selectedTheme);
+                    FontManager.setCurrentColour(selectedTheme);
+                    applyTheme(selectedTheme);
+                    updateSystemSettings();
+                } else {
+                    themeFlag = 1;
+                }
             }
 
             @Override
@@ -250,16 +271,15 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
                 startActivity(intent);
             }
         });
-
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private void addProject(String projectLabel) {
         final Project project = new Project();
-        final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/", token);
+        final ProjectService projectService = new ProjectService(getString(R.string.http_192_168_1_109_8080), token);
 
         project.setName(projectLabel);
-        project.setDescription("desc");
+        project.setDescription(getString(R.string.desc));
         projectList.add(project);
         projectService.create(project, new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -277,7 +297,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadProjectsFromDataBase() {
-        final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/",token);
+        final ProjectService projectService = new ProjectService(getString(R.string.http_192_168_1_109_8080),token);
 
         projectService.getAll(new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -304,14 +324,15 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
 
             for (int i = 0; i < data.length(); i++) {
                 JSONObject projectObject = data.getJSONObject(i);
-                final JSONObject additionalAttribute = projectObject.getJSONObject("additional_attributes");
+                final JSONObject additionalAttribute = projectObject.getJSONObject(getString(R.string.additional_attributes));
 
-                if (user.getId().equals(additionalAttribute.getString("created_by"))) {
+                if (user.getId().equals(additionalAttribute.getString(getString(R.string.created_by)))) {
                     final Project project = new Project();
 
-                    project.setId(projectObject.getString("_id"));
-                    project.setName(projectObject.getString("name"));
-                    project.setDescription(projectObject.getString("description"));
+                    project.setId(projectObject.getString(getString(R.string._id)));
+                    project.setName(projectObject.getString(getString(R.string.name)));
+                    project.setDescription(projectObject.getString(getString(R.string.description)));
+                    project.setOrder((long) projectObject.getInt(getString(R.string.sort_order)));
                     parsedProjects.add(project);
                 }
             }
@@ -330,51 +351,51 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     }
 
     private void updateProject(final Project fromProject, final Project toProject) {
-        final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/",token);
+        final ProjectService projectService = new ProjectService(getString(R.string.http_192_168_1_109_8080),token);
 
         projectService.update(fromProject, new AuthenticationService.ApiResponseCallBack() {
             @Override
             public void onSuccess(String response) {
-                showSnackBar("Project Updated");
+                showSnackBar(getString(R.string.project_updated));
             }
 
             @Override
             public void onFailure(String response) {
-                showSnackBar("Project Updation Failed");
+                showSnackBar(getString(R.string.project_updation_failed));
             }
         });
 
         projectService.update(toProject, new AuthenticationService.ApiResponseCallBack() {
             @Override
             public void onSuccess(String response) {
-                showSnackBar("Project Updated");
+                showSnackBar(getString(R.string.project_updated));
             }
 
             @Override
             public void onFailure(String response) {
-                showSnackBar("Project Updation Failed");
+                showSnackBar(getString(R.string.project_updation_failed));
             }
         });
     }
 
     private void removeProject(Project project) {
-        final ProjectService projectService = new ProjectService("http://192.168.1.109:8080/",token);
+        final ProjectService projectService = new ProjectService(getString(R.string.http_192_168_1_109_8080),token);
 
         projectService.delete(project.getId(), new AuthenticationService.ApiResponseCallBack() {
             @Override
             public void onSuccess(String response) {
-                showSnackBar("Project Deleted");
+                showSnackBar(getString(R.string.project_deleted));
             }
 
             @Override
             public void onFailure(String response) {
-                showSnackBar("Project Deletion Failure");
+                showSnackBar(getString(R.string.project_deletion_failure));
             }
         });
     }
 
     private void getUserDetail() {
-        final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.109:8080/",token);
+        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080),token);
 
         authenticationService.getUserDetail(new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -392,12 +413,12 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     private void setUserDetail(String response) {
         try {
             final JSONObject jsonObject = new JSONObject(response);
-            final JSONObject data = jsonObject.getJSONObject("data");
+            final JSONObject data = jsonObject.getJSONObject(getString(R.string.data));
 
-            user.setId(data.getString("_id"));
-            user.setName(data.getString("name"));
-            user.setTitle(data.getString("title"));
-            user.setEmail(data.getString("email"));
+            user.setId(data.getString(getString(R.string._id)));
+            user.setName(data.getString(getString(R.string.name)));
+            user.setTitle(data.getString(getString(R.string.title)));
+            user.setEmail(data.getString(getString(R.string._email)));
             userName.setText(user.getName());
             userTitle.setText(user.getTitle());
             profileIcon.setText(user.setProfileIcon());
@@ -408,21 +429,21 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     }
 
     private void getSystemSettings() {
-        final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.109:8080/", token);
+        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080), token);
 
         authenticationService.getSettingDetail(new AuthenticationService.ApiResponseCallBack() {
             @Override
             public void onSuccess(String responseBody) {
-
                 try {
                     final JSONObject responseJson = new JSONObject(responseBody);
                     final JSONObject data = responseJson.getJSONObject(getString(R.string.data));
-                    final String fontName = data.getString("font_family");
-                    final int fontSize = data.getInt("font_size");
-                    final String color = data.getString("color");
+                    final String fontName = data.getString(getString(R.string.font_family));
+                    final int fontSize = data.getInt(getString(R.string.font_size));
+                    final String color = data.getString(getString(R.string.color));
+                    final String sizeName = fontSizeName(fontSize);
 
                     FontManager.setCurrentTypeface(selectTypeface(fontName));
-                    FontManager.setCurrentFontSize(selectTextSize(String.valueOf(fontSize)));
+                    FontManager.setCurrentFontSize(selectTextSize(sizeName));
                     FontManager.setCurrentColour(getColorResourceId(color));
                     applyFontToAllLayout();
                     applyTextSizeToTextViews();
@@ -440,6 +461,36 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         });
     }
 
+    private void updateSystemSettings() {
+        final String selectedFontFamily = fontFamilySpinner.getSelectedItem().toString();
+        final String selectedColor = themeSpinner.getSelectedItem().toString();
+        final int fontSize = (int) selectTextSize(fontSizeSpinner.getSelectedItem().toString());
+        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080), token);
+
+        authenticationService.updateSystemSetting(selectedFontFamily, selectedColor, fontSize, new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(String response) {
+                showSnackBar(response);
+            }
+
+            @Override
+            public void onFailure(String response) {
+                showSnackBar(response);
+            }
+        });
+    }
+
+    private String fontSizeName(int fontSize) {
+        if (fontSize == (int) getResources().getDimension(R.dimen.small_text_size)) {
+            return "Small";
+        } else if (fontSize == (int) getResources().getDimension(R.dimen.medium_text_size)) {
+            return "Medium";
+        } else if (fontSize == (int) getResources().getDimension(R.dimen.large_text_size)) {
+            return "Large";
+        } else {
+            return "Default";
+        }
+    }
     public void applyFontToAllLayout() {
         FontManager.applyFontToView(this, getWindow().getDecorView().findViewById(android.R.id.content));
     }
@@ -453,25 +504,11 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
             case "Large":
                 return getResources().getDimension(R.dimen.large_text_size);
             default:
-                return getResources().getDimension(R.dimen.small_text_size);
+                return getResources().getDimension(R.dimen.default_text_size);
         }
     }
 
     private void applyTheme(int selectedTheme) {
-//        switch (selectedTheme) {
-//            case "Default(Green)":
-//                addList.setBackgroundColor(getResources().getColor(R.color.Primary));
-//                toolBar.setBackgroundColor(getResources().getColor(R.color.Primary));
-//                sideNavBar.setBackgroundColor(getResources().getColor(R.color.Primary));
-//                FontManager.setCurrentColour(R.color.Primary);
-//                break;
-//            case "Purple":
-//                addList.setBackgroundColor(getResources().getColor(R.color.Secondary));
-//                toolBar.setBackgroundColor(getResources().getColor(R.color.Secondary));
-//                sideNavBar.setBackgroundColor(getResources().getColor(R.color.Secondary));
-//                FontManager.setCurrentColour(R.color.Secondary);
-//                break;
-//        }
         final int selectedColor = ContextCompat.getColor(this, selectedTheme);
 
         addList.setBackgroundColor(selectedColor);
