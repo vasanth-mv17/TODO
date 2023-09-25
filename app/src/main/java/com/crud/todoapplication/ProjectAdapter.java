@@ -95,13 +95,11 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView projectNameTextView;
         ImageButton removeButton;
-        //ImageButton updateButton;
 
         public ViewHolder(@NonNull final View itemView) {
             super(itemView);
             projectNameTextView = itemView.findViewById(R.id.projectNameTextView);
             removeButton = itemView.findViewById(R.id.remove_project);
-            //updateButton = itemView.findViewById(R.id.update_project);
 
             removeButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -121,29 +119,4 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
             });
         }
     }
-
-//    public void onItemMove(final int fromPosition, final int toPosition) {
-//        final Project fromProject = projects.get(fromPosition);
-//        final Project toProject = projects.get(toPosition);
-//
-//        Collections.swap(projects, fromPosition, toPosition);
-//        fromProject.setOrder((long) (toPosition + 1));
-//        toProject.setOrder((long) fromPosition + 1);
-//        notifyItemMoved(fromPosition, toPosition);
-////        databaseConnection.updateProjectsOrder(fromProject);
-////        databaseConnection.updateProjectsOrder(toProject);
-//        onItemClickListener.onUpdateItem(fromProject, toProject);
-//    }
-
-//    @SuppressLint("NotifyDataSetChanged")
-//    public void clearProjects() {
-//        projects.clear();
-//        notifyDataSetChanged();
-//    }
-//
-//    @SuppressLint("NotifyDataSetChanged")
-//    public void addProjects(final List<Project> newProjects) {
-//        projects.addAll(newProjects);
-//        notifyDataSetChanged();
-//    }
 }

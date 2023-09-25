@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="circular_image_size">10</dimen>
-    <dimen name="small_text_size">14sp</dimen>
+    <dimen name="small_text_size">12sp</dimen>
     <dimen name="medium_text_size">16sp</dimen>
     <dimen name="large_text_size">18sp</dimen>
+    <dimen name="default_text_size">10sp</dimen>
     <dimen name="size">185sp</dimen>
 </resources>

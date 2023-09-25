@@ -47,7 +47,7 @@
     <string name="u">U</string>
     <string name="enter_your_name">Enter Your Name</string>
     <string name="enter_your_title">Enter Your Title</string>
-    <string name="title">Title</string>
+    <string name="title">title</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="Name">Name</string>
@@ -94,6 +94,24 @@
     <string name="token">token</string>
     <string name="added_successful">Added successful</string>
     <string name="project_name">Project Name</string>
+    <string name="http_192_168_1_109_8080">http://192.168.1.109:8080/</string>
+    <string name="font_family">font_family</string>
+    <string name="font_size">font_size</string>
+    <string name="color">color</string>
+    <string name="_id">_id</string>
+    <string name="_email">email</string>
+    <string name="project_deletion_failure">Project Deletion Failure</string>
+    <string name="project_deleted">Project Deleted</string>
+    <string name="project_updation_failed">Project Updation Failed</string>
+    <string name="project_updated">Project Updated</string>
+    <string name="description">description</string>
+    <string name="created_by">created_by</string>
+    <string name="additional_attributes">additional_attributes</string>
+    <string name="desc">desc</string>
+    <string name="removed">Removed</string>
+    <string name="project_id">project_id</string>
+    <string name="is_completed">is_completed</string>
+    <string name="sort_order">sort_order</string>
 
 
 </resources>

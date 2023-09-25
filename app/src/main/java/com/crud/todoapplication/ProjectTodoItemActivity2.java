@@ -94,7 +94,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int currentTheme = FontManager.getCurrentColour();
+
         setContentView(R.layout.activity_sub2);
 
         drawerLayout = findViewById(R.id.drawerLayout);
@@ -131,26 +131,16 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         androidx.recyclerview.widget.ItemTouchHelper.Callback callback = new ItemMoveHelper(adapter);
         androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper = new androidx.recyclerview.widget.ItemTouchHelper(callback);
         loadTodoItemsFromDatabase();
+
         recyclerView.setAdapter(adapter);
         itemTouchHelper.attachToRecyclerView(recyclerView);
         checkedItems = new ArrayList<>();
         unCheckedItems = new ArrayList<>();
         allItems = new ArrayList<>();
 
-        if (currentTheme == R.color.Primary) {
-           toolbar.setBackgroundColor(getResources().getColor(R.color.Primary));
-           addButton.setBackgroundColor(getResources().getColor(R.color.Primary));
-           toolBar.setBackgroundColor(getResources().getColor(R.color.Primary));
-        } else if (currentTheme == R.color.Secondary) {
-            toolbar.setBackgroundColor(getResources().getColor(R.color.Secondary));
-            addButton.setBackgroundColor(getResources().getColor(R.color.Secondary));
-            toolBar.setBackgroundColor(getResources().getColor(R.color.Secondary));
-        }
-
         if (selectedProjectName != null) {
             textView.setText(selectedProjectName);
         }
-
 
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -321,10 +311,12 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             }
         });
         applyFontToAllLayout();
+        applyFontSize();
+        applyTheme();
     }
 
     private void updateItemState(TodoItem todoItem) {
-        final TodoItemService itemService = new TodoItemService("http://192.168.1.109:8080/", token);
+        final TodoItemService itemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
 
         itemService.updateState(todoItem, new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -339,7 +331,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         });
     }
     private void updateItemOrder(TodoItem fromItem, TodoItem toItem) {
-        final TodoItemService itemService = new TodoItemService("http://192.168.1.109:8080/", token);
+        final TodoItemService itemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
 
         itemService.update(fromItem, new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -365,12 +357,12 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
 
 
     private void removeTodoItem(final TodoItem todoItem) {
-        final TodoItemService itemService = new TodoItemService("http://192.168.1.109:8080/", token);
+        final TodoItemService itemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
 
         itemService.delete(todoItem.getId(), new AuthenticationService.ApiResponseCallBack() {
             @Override
             public void onSuccess(String responseBody) {
-                showSnackBar("Removed");
+                showSnackBar(getString(R.string.removed));
             }
 
             @Override
@@ -380,6 +372,22 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         });
     }
 
+    public void applyTheme() {
+        int currentTheme = FontManager.getCurrentColour();
+        if (currentTheme == R.color.Primary) {
+            toolbar.setBackgroundColor(getResources().getColor(R.color.Primary));
+            addButton.setBackgroundColor(getResources().getColor(R.color.Primary));
+            toolBar.setBackgroundColor(getResources().getColor(R.color.Primary));
+        } else if (currentTheme == R.color.Secondary) {
+            toolbar.setBackgroundColor(getResources().getColor(R.color.Secondary));
+            addButton.setBackgroundColor(getResources().getColor(R.color.Secondary));
+            toolBar.setBackgroundColor(getResources().getColor(R.color.Secondary));
+        }
+    }
+
+    public void applyFontSize() {
+        FontManager.applyFontToView(this, getWindow().getDecorView().findViewById(android.R.id.content));
+    }
 
     public void applyFontToAllLayout() {
         FontManager.applyFontToView(this, getWindow().getDecorView().findViewById(android.R.id.content));
@@ -398,7 +406,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
 
 
     private void loadTodoItemsFromDatabase() {
-        final TodoItemService todoItemService = new TodoItemService("http://192.168.1.109:8080/",token);
+        final TodoItemService todoItemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
 
         todoItemService.getAllItem(new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -435,14 +443,14 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
                 JSONObject projectObject = data.getJSONObject(i);
 
 
-                if (null != selectedProjectId && selectedProjectId.equals(projectObject.getString("project_id"))) {
+                if (null != selectedProjectId && selectedProjectId.equals(projectObject.getString(getString(R.string.project_id)))) {
                     final TodoItem todoItem = new TodoItem();
 
-                    todoItem.setId(projectObject.getString("_id"));
+                    todoItem.setId(projectObject.getString(getString(R.string._id)));
                     todoItem.setParentId(selectedProjectId);
-                    todoItem.setStatus(projectObject.getBoolean("is_completed") ? TodoItem.Status.CHECKED : TodoItem.Status.UNCHECKED);
-                    todoItem.setName(projectObject.getString("name"));
-                    todoItem.setOrder((long) projectObject.getInt("sort_order"));
+                    todoItem.setStatus(projectObject.getBoolean(getString(R.string.is_completed)) ? TodoItem.Status.CHECKED : TodoItem.Status.UNCHECKED);
+                    todoItem.setName(projectObject.getString(getString(R.string.name)));
+                    todoItem.setOrder((long) projectObject.getInt(getString(R.string.sort_order)));
                     parsedProjects.add(todoItem);
                 }
             }
@@ -543,7 +551,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         if (!todoLabel.isEmpty()) {
             final TodoItem todoItem = new TodoItem();
             final long itemOrder = adapter.getItemCount() + 1;
-            final TodoItemService todoItemService = new TodoItemService("http://192.168.1.109:8080/",token);
+            final TodoItemService todoItemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
 
             todoItem.setName(todoLabel);
             todoItem.setParentId(selectedProjectId);

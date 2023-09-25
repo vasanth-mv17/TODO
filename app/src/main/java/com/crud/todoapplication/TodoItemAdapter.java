@@ -57,7 +57,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TodoItem todoItem = todoItems.get(position);
         Typeface typeface = FontManager.getCurrentTypeface();
-        //holder.bind(todoItem,listener);
+
         holder.itemText.setTypeface(typeface);
         holder.bind(todoItem, listener);
 
@@ -105,7 +105,6 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
                             : TodoItem.Status.UNCHECKED);
                     itemText.setTextColor(todoItem.getStatus() == TodoItem.Status.CHECKED
                             ? Color.GRAY : Color.BLACK);
-//                    listener.onCheckBoxClick(todoItem);
                 }
             });
 

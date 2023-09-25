@@ -2,6 +2,7 @@ package com.crud.todoapplication.api;
 
 import com.crud.todoapplication.model.Project;
 import com.crud.todoapplication.model.SignUp;
+import com.crud.todoapplication.model.User;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -11,6 +12,7 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 
 
 public interface ApiService {
@@ -36,8 +38,14 @@ public interface ApiService {
     @GET("api/v1/user/details")
     Call<ResponseBody> getUserDetail();
 
+    @PUT("api/v1/user/details")
+    Call<ResponseBody> updateUserSetting(@Body User user );
+
     @GET("api/v1/user/system/settings")
     Call<ResponseBody> getSystemSetting();
+
+    @PUT("api/v1/user/system/settings")
+    Call<ResponseBody> updateSystemSetting();
 
 }
 
