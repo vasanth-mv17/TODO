@@ -33,7 +33,7 @@ public class SignUpActivity extends AppCompatActivity {
     private boolean isPasswordVisible;
     private Credentials userCredentials;
     private User user;
-    private DatabaseConnection databaseConnection;
+
     private static Long id = 0L;
 
 
@@ -55,7 +55,6 @@ public class SignUpActivity extends AppCompatActivity {
         Button signUp = findViewById(R.id.register_button);
         userCredentials = new Credentials();
         user = new User();
-        databaseConnection = new DatabaseConnection(this);
         alreadyAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -87,41 +86,28 @@ public class SignUpActivity extends AppCompatActivity {
                 userCredentials.setHint(hint.getText().toString());
                 userCredentials.setConformPassword(rePassword.getText().toString());
 
-//                String hashedPassword = MD5Helper.md5(userCredentials.getPassword());
-//                String hashedConfirmPassword = MD5Helper.md5(userCredentials.getConformPassword());
-
-//                userCredentials.setPassword(hashedPassword);
-//                userCredentials.setConformPassword(hashedConfirmPassword);
-
                 if (TextUtils.isEmpty(user.getName()) || TextUtils.isEmpty(userCredentials.getEmail()) || TextUtils.isEmpty(userCredentials.getPassword()) || TextUtils.isEmpty(userCredentials.getHint()) || TextUtils.isEmpty(userCredentials.getConformPassword()) || TextUtils.isEmpty(user.getTitle())) {
                     showSnackBar(String.valueOf(R.string.all_fields_are_required));
                 } else {
                     if (userCredentials.getPassword().equals(userCredentials.getConformPassword())) {
-                        final Boolean checkUser = databaseConnection.checkUserName(user);
-                        final Boolean checkEmail = databaseConnection.checkUserSignUpEmail(userCredentials);
+                        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080));
+                        final SignUp signUpUser = new SignUp(user, userCredentials);
+                        authenticationService.signUp(signUpUser, new AuthenticationService.ApiResponseCallBack() {
+                            @Override
+                            public void onSuccess(String response) {
+                                showSnackBar(getString(R.string.Signup_successful));
+                                new Handler().postDelayed(() -> {
+                                    final Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                },100);
+                            }
 
-                        if (!checkUser && !checkEmail) {
-                            final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.109:8080/");
-                            final SignUp signUpUser = new SignUp(user, userCredentials);
-                            authenticationService.signUp(signUpUser, new AuthenticationService.ApiResponseCallBack() {
-                                @Override
-                                public void onSuccess(String response) {
-                                    showSnackBar(getString(R.string.Signup_successful));
-                                    new Handler().postDelayed(() -> {
-                                        final Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-                                        startActivity(intent);
-                                        finish();
-                                    },100);
-                                }
-
-                                @Override
-                                public void onFailure(String response) {
-                                    showSnackBar(getString(R.string.Signup_failed));
-                                }
-                            });
-                        } else {
-                            showSnackBar(getString(R.string.User_already_exists));
-                        }
+                            @Override
+                            public void onFailure(String response) {
+                                showSnackBar(getString(R.string.Signup_failed));
+                            }
+                        });
                     } else {
                         showSnackBar(getString(R.string.password_mismatch));
                     }

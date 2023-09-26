@@ -18,7 +18,6 @@ import java.util.List;
 
 public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHolder> {
     private final List<Project> projects;
-    private final DatabaseConnection databaseConnection;
     private OnItemClickListener onItemClickListener;
 
     public interface OnItemClickListener {
@@ -32,9 +31,8 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
         this.onItemClickListener = onItemClickListener;
     }
 
-    public ProjectAdapter(final List<Project> projects, final DatabaseConnection databaseConnection) {
+    public ProjectAdapter(final List<Project> projects) {
         this.projects = projects;
-        this.databaseConnection = databaseConnection;
     }
 
 
@@ -48,17 +46,23 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         final Project project = projects.get(position);
-        Typeface typeface = FontManager.getCurrentTypeface();
+        final Typeface typeface = FontManager.getCurrentTypeface();
         float textSize = FontManager.getCurrentFontSize();
 
-        holder.projectNameTextView.setTextSize(textSize);
-        holder.projectNameTextView.setTypeface(typeface);
+        if (null != typeface) {
+            holder.projectNameTextView.setTypeface(typeface);
+        } else if (0 != textSize) {
+            holder.projectNameTextView.setTextSize(textSize);
+        }
         holder.projectNameTextView.setText(project.getName());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
+                final int position = holder.getAdapterPosition();
 
-                onItemClickListener.onItemClick(position);
+                if (position != RecyclerView.NO_POSITION) {
+                    onItemClickListener.onItemClick(position);
+                }
             }
         });
     }
@@ -83,9 +87,8 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ViewHold
         fromProject.setOrder((long) (toPosition + 1));
         toProject.setOrder((long) fromPosition + 1);
         notifyItemMoved(fromPosition, toPosition);
-//        databaseConnection.updateProjectsOrder(fromProject);
-//        databaseConnection.updateProjectsOrder(toProject);
         onItemClickListener.onUpdateItem(fromProject, toProject);
+
     }
     @Override
     public int getItemCount() {

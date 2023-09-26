@@ -63,7 +63,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     if (!pass.equals(rePass)) {
                         showSnackBar(getString(R.string.password_mismatch));
                     } else {
-                        final AuthenticationService authenticationService = new AuthenticationService("http://192.168.1.109:8080/");
+                        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080));
                         authenticationService.resetPassword(email, hashPassword, oldHintForPassword, newHintForPassword, new AuthenticationService.ApiResponseCallBack() {
                             @Override
                             public void onSuccess(String response) {
