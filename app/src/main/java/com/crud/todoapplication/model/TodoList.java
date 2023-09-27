@@ -21,7 +21,7 @@ public class TodoList {
         todoItems.add(todoItem);
     }
 
-    public void remove(final Long id) {
+    public void remove(final String id) {
         todoItems = todoItems.stream().filter(todoItem -> ! Objects.equals(todoItem.getId(), id))
                 .collect(Collectors.toList());
     }

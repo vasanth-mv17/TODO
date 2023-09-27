@@ -57,14 +57,14 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TodoItem todoItem = todoItems.get(position);
         Typeface typeface = FontManager.getCurrentTypeface();
+        float fontSize = FontManager.getCurrentFontSize();
 
-        holder.itemText.setTypeface(typeface);
+        if (null != typeface) {
+            holder.itemText.setTypeface(typeface);
+        } else if (0 != fontSize) {
+            holder.itemText.setTextSize(fontSize);
+        }
         holder.bind(todoItem, listener);
-
-//        holder.removeButton.setOnClickListener(v -> {
-//            todoItems.remove(position);
-//            notifyDataSetChanged();
-//        });
     }
 
     @Override

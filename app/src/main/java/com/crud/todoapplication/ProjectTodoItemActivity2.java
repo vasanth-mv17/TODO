@@ -64,23 +64,17 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     private ImageButton nextPageButton;
     private ImageButton filterButton;
     private ImageButton addButton;
-
     private String selectedProjectName;
     private String selectedProjectId;
     private TodoList todoList;
-    private User user;
     private DatabaseConnection databaseConnection;
     private com.crud.todoapplication.model.Filter filter;
     private ProjectListController projectListController;
     private List<TodoItem> todoItems;
-    private List<TodoItem> checkedItems;
-    private List<TodoItem> unCheckedItems;
-    private List<TodoItem> allItems;
     private RelativeLayout toolbar;
     private RelativeLayout toolBar;
     private int currentPage = 1;
-    private int pageCapacity = 10;
-    private static Long id = 0L;
+    private int pageCapacity;
     private String token;
 
     /**
@@ -94,7 +88,6 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_sub2);
 
         drawerLayout = findViewById(R.id.drawerLayout);
@@ -112,50 +105,66 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         textView = findViewById(R.id.listName);
         toolbar = findViewById(R.id.toolbar);
         toolBar = findViewById(R.id.bottom_toolbar);
-
         recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         projectListController = new ProjectListController(this);
         selectedProjectId = getIntent().getStringExtra(getString(R.string.ProjectId));
         selectedProjectName = getIntent().getStringExtra(getString(R.string.ProjectName));
         token = getIntent().getStringExtra(getString(R.string.token));
         todoList = new TodoList();
-        user = new User();
         databaseConnection = new DatabaseConnection(this);
         filter = new com.crud.todoapplication.model.Filter();
-
-        //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
         todoItems = todoList.getAllItems();
+        pageCapacity = Integer.parseInt(filterSpinnerPage.getSelectedItem().toString());
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new TodoItemAdapter(todoItems, ProjectTodoItemActivity2.this, databaseConnection, todoList);
         androidx.recyclerview.widget.ItemTouchHelper.Callback callback = new ItemMoveHelper(adapter);
         androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper = new androidx.recyclerview.widget.ItemTouchHelper(callback);
         loadTodoItemsFromDatabase();
-
         recyclerView.setAdapter(adapter);
         itemTouchHelper.attachToRecyclerView(recyclerView);
-        checkedItems = new ArrayList<>();
-        unCheckedItems = new ArrayList<>();
-        allItems = new ArrayList<>();
 
         if (selectedProjectName != null) {
             textView.setText(selectedProjectName);
         }
 
+        setupMenuButton();
+        setupAddList();
+        setupAdapter();
+        setupSearchButton();
+        setupStatusSpinner();
+        setupPageFilterSpinner();
+        setupPreviousPageButton();
+        setupNextPageButton();
+        setupFilterButton();
+        setupAddShowButton();
+        applyFontToAllLayout();
+        applyFontSize();
+        applyTheme();
+    }
+
+    private void setupMenuButton() {
+        menuButton = findViewById(R.id.menuButton);
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 onBackPressed();
             }
         });
+    }
 
+    private void setupAddList() {
+        addButton = findViewById(R.id.button);
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 projectListController.onAddButtonClick();
             }
         });
+    }
 
+    private void setupAdapter() {
         adapter.setOnClickListener(new TodoItemAdapter.OnItemClickListener() {
             @Override
             public void onCheckBoxClick(TodoItem todoItem) {
@@ -166,8 +175,13 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             @Override
             public void onCloseIconClick(TodoItem todoItem) {
                 removeTodoItem(todoItem);
+                todoList.remove(todoItem.getId());
                 todoItems.remove(todoItem);
                 adapter.notifyDataSetChanged();
+
+                if (currentPage > totalPages()) {
+                    currentPage = totalPages();
+                }
 
                 updateRecyclerView();
                 updatePageNumber(pageNumber);
@@ -178,7 +192,10 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
                 updateItemOrder(fromItem, toItem);
             }
         });
+    }
 
+    private void setupSearchButton() {
+        searchButton = findViewById(R.id.searchView);
         searchButton.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(final String query) {
@@ -189,13 +206,12 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             public boolean onQueryTextChange(final String newText) {
                 projectListController.onSearchAndDisplayItems(newText);
 
-                if (null != todoItems) {
-                    adapter.clearProjects();
-                    adapter.addProjects(todoItems);
-                }
                 return true;
             }
         });
+    }
+
+    private void setupStatusSpinner() {
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(
                 this, R.array.filter_options, android.R.layout.simple_spinner_item);
 
@@ -219,8 +235,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
                         currentPage = 1;
 
                         if (null != todoItems) {
-                            adapter.clearProjects();
-                            adapter.addProjects(todoItems);
+                            adapter.updateTodoItems(todoItems);
                         }
                         break;
                     case CHECKED:
@@ -230,23 +245,30 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
                         displayUncheckedItems();
                         break;
                 }
-
+                updateRecyclerView();
                 updatePageNumber(pageNumber);
             }
             @Override
             public void onNothingSelected(final AdapterView<?> parentView) {
             }
         });
+    }
+
+    private void setupPageFilterSpinner() {
         final ArrayAdapter<CharSequence> pageSpinnerAdapter = ArrayAdapter.createFromResource(
                 this, R.array.page_options, android.R.layout.simple_spinner_item);
 
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        pageSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         filterSpinnerPage.setAdapter(pageSpinnerAdapter);
         filterSpinnerPage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(final AdapterView<?> adapterView, final View view, final int i, final long l) {
                 pageCapacity = Integer.parseInt(adapterView.getItemAtPosition(i).toString());
 
+                if (currentPage > totalPages()) {
+                    currentPage = totalPages();
+                }
+                updateRecyclerView();
                 updatePageNumber(pageNumber);
             }
 
@@ -255,6 +277,9 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             }
         });
 
+    }
+
+    private void setupPreviousPageButton() {
         previousPageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -263,11 +288,11 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
                     loadTodoItemsFromDatabase();
                     updatePageNumber(pageNumber);
                 }
-
-
             }
         });
+    }
 
+    private void setupNextPageButton() {
         nextPageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -278,7 +303,9 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
                 }
             }
         });
+    }
 
+    private void setupFilterButton() {
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -293,6 +320,9 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
                 }
             }
         });
+    }
+
+    private void setupAddShowButton() {
         final ImageButton addShowButton = findViewById(R.id.addButton);
         final TextView addTextView = findViewById(R.id.addTodoItem);
 
@@ -310,9 +340,6 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
                 }
             }
         });
-        applyFontToAllLayout();
-        applyFontSize();
-        applyTheme();
     }
 
     private void updateItemState(TodoItem todoItem) {
@@ -330,6 +357,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             }
         });
     }
+
     private void updateItemOrder(TodoItem fromItem, TodoItem toItem) {
         final TodoItemService itemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
 
@@ -354,7 +382,6 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             }
         });
     }
-
 
     private void removeTodoItem(final TodoItem todoItem) {
         final TodoItemService itemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
@@ -403,7 +430,6 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         UNCHECKED()
 
     }
-
 
     private void loadTodoItemsFromDatabase() {
         final TodoItemService todoItemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
@@ -466,7 +492,6 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         }
 
         return parsedProjects;
-
     }
 
     /**
@@ -476,7 +501,6 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      *
      */
     private void displayCheckedItems() {
-        //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
         todoItems = todoList.getAllItems(selectedProjectId);
         List<TodoItem> checkedItems = new ArrayList<>();
 
@@ -488,9 +512,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         todoItems = checkedItems;
         currentPage = 1;
         if (null != todoItems) {
-
-            adapter.clearProjects();
-            adapter.addProjects(todoItems);
+            adapter.updateTodoItems(todoItems);
         }
     }
 
@@ -501,7 +523,6 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      *
      */
     private void displayUncheckedItems() {
-        //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
         todoItems = todoList.getAllItems(selectedProjectId);
         List<TodoItem> unCheckedItems = new ArrayList<>();
 
@@ -513,8 +534,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         todoItems = unCheckedItems;
         currentPage = 1;
         if (null != todoItems) {
-            adapter.clearProjects();
-            adapter.addProjects(todoItems);
+            adapter.updateTodoItems(todoItems);
         }
     }
 
@@ -527,7 +547,6 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      */
     public void filterAndDisplayItems(final String query) {
         filter.setSearchAttribute(query);
-        //todoItems = databaseConnection.getTodoItemsForProject(selectedProjectId);
         todoItems = todoList.getAllItems(selectedProjectId);
         List<TodoItem> searchAllItems = new ArrayList<>();
 
@@ -538,6 +557,9 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         }
         todoItems = searchAllItems;
         currentPage = 1;
+        if (null != todoItems) {
+            adapter.updateTodoItems(todoItems);
+        }
     }
 
     /**
@@ -557,21 +579,22 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             todoItem.setParentId(selectedProjectId);
             todoItem.setStatus(TodoItem.Status.UNCHECKED);
             todoItem.setOrder(itemOrder);
+            todoList.add(todoItem);
 
             todoItemService.create(todoItem.getName(), selectedProjectId, new AuthenticationService.ApiResponseCallBack() {
                 @Override
                 public void onSuccess(String response) {
                     showSnackBar(getString(R.string.added_successful));
-                    todoList.add(todoItem);
+
                     todoItems = todoList.getAllItems(selectedProjectId);
 
                     pageNumber.setVisibility(View.VISIBLE);
                     previousPageButton.setVisibility(View.VISIBLE);
                     nextPageButton.setVisibility(View.VISIBLE);
-//                    adapter.addTodoItems(todoItems);
+//                    adapter.addProjects(todoItems);
+//                    loadTodoItemsFromDatabase();
                     adapter.updateTodoItems(todoItems);
-
-
+                    loadTodoItemsFromDatabase();
                 }
 
                 @Override
@@ -580,40 +603,9 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
                 }
             });
 
-
-
-
-
-
-//            final long itemOrder = adapter.getItemCount() + 1;
-//
-//            todoItem.setParentId(selectedProjectId);
-//            todoItem.setId(++id);
-//            todoItem.setOrder(itemOrder);
-//            todoItem.setStatus(TodoItem.Status.UNCHECKED);
-//            todoList.add(todoItem);
-//
-//            databaseConnection.insertTodo(todoItem);
-//            adapter.notifyDataSetChanged();
-//            todoItems = todoList.getAllItems(selectedProjectId);
-//            int totalPageCount = (int) Math.ceil((double) todoItems.size()/ pageCapacity);
-
-//            if (1 == todoItems.size() % pageCapacity && currentPage == totalPageCount - 1) {
-//                currentPage = totalPageCount;
-//            }
-
-//            pageCapacity = 10;
-            pageNumber.setVisibility(View.VISIBLE);
-            previousPageButton.setEnabled(true);
-            previousPageButton.setColorFilter(null);
-            nextPageButton.setEnabled(true);
-            nextPageButton.setColorFilter(null);
-
             editText.getText().clear();
             updateRecyclerView();
             updatePageNumber(pageNumber);
-
-
         }
     }
 
@@ -626,6 +618,10 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     private void updateRecyclerView() {
         int startIndex = (currentPage - 1) * pageCapacity;
         int endIndex = Math.min(startIndex + pageCapacity, todoItems.size());
+
+        if (0 > startIndex) {
+            startIndex = 0;
+        }
 
         List<TodoItem> pageItems = todoItems.subList(startIndex, endIndex);
         adapter.updateTodoItems(pageItems);
@@ -640,38 +636,11 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      */
     @SuppressLint("DefaultLocale")
     private void updatePageNumber(final TextView pageNumber) {
-        final int totalPageCount = (int) Math.ceil((double) todoItems.size() / pageCapacity);
-
-        pageNumber.setText(String.format("%d / %d", currentPage, totalPageCount));
+        pageNumber.setText(String.format("%d / %d", currentPage, totalPages()));
     }
 
-    private void removeItem(final TableRow tableRow, final TodoItem todoItem) {
-        int previousTotalPageCount = (int) Math.ceil((double) todoItems.size() / pageCapacity);
-        tableLayout.removeView(tableRow);
-        //todoList.remove(todoItem.getId());
-
-        todoItems = todoList.getAllItems();
-        int totalPageCount = (int) Math.ceil((double) todoItems.size() / pageCapacity);
-
-        if (currentPage > totalPageCount) {
-            currentPage = totalPageCount;
-        }
-
-        if (todoItems.isEmpty()) {
-            currentPage = 0;
-            pageCapacity = 0;
-            pageNumber.setVisibility(View.GONE);
-            previousPageButton.setEnabled(false);
-            previousPageButton.setColorFilter(Color.GRAY);
-            nextPageButton.setEnabled(false);
-            nextPageButton.setColorFilter(Color.GRAY);
-        } else {
-            pageCapacity = 10;
-            updatePageNumber(pageNumber);
-            if (previousTotalPageCount > totalPageCount) {
-
-            }
-        }
+    private int totalPages() {
+        return (int) Math.ceil((double) todoItems.size() / pageCapacity);
     }
 
     private void showSnackBar(final String message) {

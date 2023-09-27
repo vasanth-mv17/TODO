@@ -50,30 +50,26 @@ import java.util.List;
  */
 public class MenuActivity2 extends AppCompatActivity implements MenuView {
 
-    private DrawerLayout drawerLayout;
-    private Credentials userCredentials;
-    private RecyclerView recyclerView;
-    private ProjectAdapter adapter;
-    private List<Project> projects;
-    private ProjectList projectList;
-    private ImageButton menuButton;
-    private User user;
-    private DatabaseConnection databaseConnection;
     private static final int REQUEST_CODE = 1;
-    private TextView profileIcon;
-    private TextView userName;
-    private TextView userTitle;
+    private final int currentTheme = R.style.Green;
+    private User user;
+    private ProjectList projectList;
+    private List<Project> projects;
+    private ProjectAdapter adapter;
     private String token;
-    private Spinner fontFamilySpinner;
-    private Spinner themeSpinner;
-    private Spinner fontSizeSpinner;
-    private int currentTheme = R.style.Green;
-    private RelativeLayout toolBar;
-    private RelativeLayout sideNavBar;
-    private ImageButton addList;
     private int fontFamilyFlag;
     private int fontSizeFlag;
     private int themeFlag;
+    private DrawerLayout drawerLayout;
+    private ImageButton menuButton;
+    private Spinner fontFamilySpinner;
+    private Spinner themeSpinner;
+    private Spinner fontSizeSpinner;
+    private TextView profileIcon;
+    private TextView userName;
+    private TextView userTitle;
+    private ImageButton addList;
+
 
     /**
      * <p>
@@ -90,25 +86,30 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         setContentView(R.layout.activity_menu2);
 
         projectList = new ProjectList();
-        databaseConnection = new DatabaseConnection(this);
+        user = new User();
         drawerLayout = findViewById(R.id.drawerLayout);
-        menuButton = findViewById(R.id.menuButton);
-        recyclerView = findViewById(R.id.recyclerView);
         profileIcon = findViewById(R.id.profileIcon);
         userName = findViewById(R.id.profileName);
         userTitle = findViewById(R.id.profileTitle);
-        user = new User();
         projects = projectList.getAllList();
-        userCredentials  = new Credentials();
         token = getIntent().getStringExtra(getString(R.string.token));
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ProjectAdapter(projects, databaseConnection);
-        androidx.recyclerview.widget.ItemTouchHelper.Callback callback = new ItemTouchHelper(adapter);
-        androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper = new androidx.recyclerview.widget.ItemTouchHelper(callback);
-        recyclerView.setAdapter(adapter);
-        itemTouchHelper.attachToRecyclerView(recyclerView);
+
+        setupMenuButton();
+        setupEditButton();
+        setupAddListButton();
+        setupAdapter();
+        setupSettingButton();
+        setupFontFamilySpinner();
+        setupFontSizeSpinner();
+        setupThemeSpinner();
+        setupLogoutButton();
         getUserDetail();
         loadProjectsFromDataBase();
+        getSystemSettings();
+    }
+
+    private void setupMenuButton() {
+        menuButton = findViewById(R.id.menuButton);
 
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,7 +117,9 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
                 drawerLayout.openDrawer(GravityCompat.START);
             }
         });
+    }
 
+    private void setupEditButton() {
         final ImageButton editButton = findViewById(R.id.editIcon);
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,12 +130,13 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
                 startActivityIfNeeded(intent, REQUEST_CODE);
             }
         });
+    }
 
+    private void setupAddListButton() {
         final EditText addListItem = findViewById(R.id.addListItem);
         addList = findViewById(R.id.addList);
 
         addList.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
                 final String projectLabel = addListItem.getText().toString();
@@ -143,6 +147,17 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
                 }
             }
         });
+    }
+
+    private void setupAdapter() {
+        final RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        adapter = new ProjectAdapter(projects);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        androidx.recyclerview.widget.ItemTouchHelper.Callback callback = new ItemTouchHelper(adapter);
+        androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper = new androidx.recyclerview.widget.ItemTouchHelper(callback);
+        recyclerView.setAdapter(adapter);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         adapter.setOnItemClickListener(new ProjectAdapter.OnItemClickListener() {
             @Override
@@ -162,7 +177,9 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
             }
         });
 
-        getSystemSettings();
+    }
+
+    private void setupSettingButton() {
         final ImageButton setting = findViewById(R.id.setting_button);
         setting.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -170,9 +187,11 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
                 drawerLayout.openDrawer(GravityCompat.END);
             }
         });
-        fontFamilySpinner = findViewById(R.id.fontFamily1);
+    }
 
-        ArrayAdapter<CharSequence> fontFamilyAdapter = ArrayAdapter.createFromResource(
+    private void setupFontFamilySpinner() {
+       fontFamilySpinner = findViewById(R.id.fontFamily1);
+        final ArrayAdapter<CharSequence> fontFamilyAdapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.font_family,
                 android.R.layout.simple_spinner_item
@@ -198,9 +217,11 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-        fontSizeSpinner = findViewById(R.id.font_size);
+    }
 
-        ArrayAdapter<CharSequence> fontSizeAdapter = ArrayAdapter.createFromResource(
+    private void setupFontSizeSpinner() {
+        fontSizeSpinner = findViewById(R.id.font_size);
+        final ArrayAdapter<CharSequence> fontSizeAdapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.font_size,
                 android.R.layout.simple_spinner_item
@@ -212,28 +233,27 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         fontSizeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-               if (!(fontSizeFlag == 0)) {
-                   String selectedFontSize = adapterView.getItemAtPosition(i).toString();
-                   float textSize = selectTextSize(selectedFontSize);
+                if (!(fontSizeFlag == 0)) {
+                    String selectedFontSize = adapterView.getItemAtPosition(i).toString();
+                    float textSize = selectTextSize(selectedFontSize);
 
-                   FontManager.setCurrentFontSize(textSize);
-                   applyTextSizeToTextViews();
-                   updateSystemSettings();
-               } else {
-                   fontSizeFlag = 1;
-               }
+                    FontManager.setCurrentFontSize(textSize);
+                    applyTextSizeToTextViews();
+                    updateSystemSettings();
+                } else {
+                    fontSizeFlag = 1;
+                }
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
+    }
 
+    private void setupThemeSpinner() {
         themeSpinner = findViewById(R.id.theme_color);
-        toolBar = findViewById(R.id.toolbar_view);
-        sideNavBar = findViewById(R.id.sideNavMenu);
-
-        ArrayAdapter<CharSequence> themeAdapter = ArrayAdapter.createFromResource(
+        final ArrayAdapter<CharSequence> themeAdapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.theme,
                 android.R.layout.simple_spinner_item
@@ -259,10 +279,11 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
 
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
-
             }
         });
+    }
 
+    private void setupLogoutButton() {
         final ImageView logout = findViewById(R.id.logout);
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -510,6 +531,8 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
 
     private void applyTheme(int selectedTheme) {
         final int selectedColor = ContextCompat.getColor(this, selectedTheme);
+        final RelativeLayout toolBar = findViewById(R.id.toolbar_view);
+        final RelativeLayout sideNavBar = findViewById(R.id.sideNavMenu);
 
         addList.setBackgroundColor(selectedColor);
         toolBar.setBackgroundColor(selectedColor);
