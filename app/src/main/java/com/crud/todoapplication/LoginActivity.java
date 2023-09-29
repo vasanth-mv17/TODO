@@ -15,7 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.crud.todoapplication.api.AuthenticationService;
-import com.crud.todoapplication.model.User;
+import com.crud.todoapplication.serviceFactory.TodoFactoryService;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONException;
@@ -27,7 +27,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText userPassword;
     private ImageView passwordVisibility;
     private boolean isPasswordVisible;
-    private DatabaseConnection databaseConnection;
+    private TodoFactoryService todoFactoryService;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -35,14 +35,13 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        databaseConnection = new DatabaseConnection(this);
         final TextView signUp = findViewById(R.id.signUp);
         final TextView forgotPassword = findViewById(R.id.textView4);
         final Button signIn = findViewById(R.id.signIn);
         userEmail = findViewById(R.id.login_email);
         userPassword = findViewById(R.id.login_pass);
         passwordVisibility = findViewById(R.id.visible_password);
-        final User user = databaseConnection.getUserProfile();
+        todoFactoryService = TodoFactoryService.getInstance();
         signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -73,8 +72,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(email) || TextUtils.isEmpty(pass)) {
                     showSnackBar(String.valueOf(R.string.All_fields_are_required));
                 } else {
-                   // final String hashPassword = MD5Helper.md5(pass);
-                    final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080));
+                    final AuthenticationService authenticationService = todoFactoryService.createAuthentication(getString(R.string.http_192_168_1_109_8080));
                     authenticationService.login(email, pass, new AuthenticationService.ApiResponseCallBack() {
                         @Override
                         public void onSuccess(String response) {

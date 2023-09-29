@@ -24,7 +24,7 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
 
     private List<TodoItem> todoItems;
     private Context context;
-    private DatabaseConnection databaseConnection;
+
     private TodoList todoList;
     private OnItemClickListener listener;
 
@@ -35,10 +35,9 @@ public class TodoItemAdapter extends RecyclerView.Adapter<TodoItemAdapter.ViewHo
         void onItemUpdate(TodoItem fromItem, TodoItem toItem);
     }
 
-    public TodoItemAdapter(List<TodoItem> todoItems, Context context, DatabaseConnection databaseConnection, TodoList todoList) {
+    public TodoItemAdapter(List<TodoItem> todoItems, Context context, TodoList todoList) {
         this.todoItems = todoItems;
         this.context = context;
-        this.databaseConnection = databaseConnection;
         this.todoList = todoList;
     }
 

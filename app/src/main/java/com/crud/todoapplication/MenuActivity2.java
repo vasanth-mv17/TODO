@@ -29,6 +29,7 @@ import com.crud.todoapplication.model.Project;
 import com.crud.todoapplication.model.ProjectList;
 import com.crud.todoapplication.model.User;
 import com.crud.todoapplication.service.MenuView;
+import com.crud.todoapplication.serviceFactory.TodoFactoryService;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
@@ -69,7 +70,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     private TextView userName;
     private TextView userTitle;
     private ImageButton addList;
-
+    private TodoFactoryService todoFactoryService;
 
     /**
      * <p>
@@ -87,6 +88,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
 
         projectList = new ProjectList();
         user = new User();
+        todoFactoryService = TodoFactoryService.getInstance();
         drawerLayout = findViewById(R.id.drawerLayout);
         profileIcon = findViewById(R.id.profileIcon);
         userName = findViewById(R.id.profileName);
@@ -161,13 +163,13 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
 
         adapter.setOnItemClickListener(new ProjectAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(int position) {
+            public void onItemClick(final int position) {
                 final Project project = projectList.getAllList().get(position);
                 goToListPage(project);
             }
 
             @Override
-            public void onRemoveItem(int position) {
+            public void onRemoveItem(final int position) {
                 removeProject(projects.get(position));
             }
 
@@ -190,7 +192,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     }
 
     private void setupFontFamilySpinner() {
-       fontFamilySpinner = findViewById(R.id.fontFamily1);
+        fontFamilySpinner = findViewById(R.id.fontFamily1);
         final ArrayAdapter<CharSequence> fontFamilyAdapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.font_family,
@@ -213,6 +215,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
                     fontFamilyFlag = 1;
                 }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
@@ -297,7 +300,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     @SuppressLint("NotifyDataSetChanged")
     private void addProject(String projectLabel) {
         final Project project = new Project();
-        final ProjectService projectService = new ProjectService(getString(R.string.http_192_168_1_109_8080), token);
+        final ProjectService projectService = todoFactoryService.createProject(getString(R.string.http_192_168_1_109_8080), token);
 
         project.setName(projectLabel);
         project.setDescription(getString(R.string.desc));
@@ -318,7 +321,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadProjectsFromDataBase() {
-        final ProjectService projectService = new ProjectService(getString(R.string.http_192_168_1_109_8080),token);
+        final ProjectService projectService = todoFactoryService.createProject(getString(R.string.http_192_168_1_109_8080), token);
 
         projectService.getAll(new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -328,6 +331,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
                 adapter.clearProjects();
                 adapter.addProjects(projects);
             }
+
             @Override
             public void onFailure(String response) {
                 showSnackBar(response);
@@ -336,15 +340,14 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     }
 
     private List<Project> getProjectsFromResponse(String jsonResponse) {
-        List<Project> parsedProjects = new ArrayList<>();
+        final List<Project> parsedProjects = new ArrayList<>();
 
         try {
             final JSONObject responseJson = new JSONObject(jsonResponse);
             final JSONArray data = responseJson.getJSONArray(getString(R.string.data));
 
-
             for (int i = 0; i < data.length(); i++) {
-                JSONObject projectObject = data.getJSONObject(i);
+                final JSONObject projectObject = data.getJSONObject(i);
                 final JSONObject additionalAttribute = projectObject.getJSONObject(getString(R.string.additional_attributes));
 
                 if (user.getId().equals(additionalAttribute.getString(getString(R.string.created_by)))) {
@@ -372,7 +375,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     }
 
     private void updateProject(final Project fromProject, final Project toProject) {
-        final ProjectService projectService = new ProjectService(getString(R.string.http_192_168_1_109_8080),token);
+        final ProjectService projectService = todoFactoryService.createProject(getString(R.string.http_192_168_1_109_8080), token);
 
         projectService.update(fromProject, new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -400,7 +403,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     }
 
     private void removeProject(Project project) {
-        final ProjectService projectService = new ProjectService(getString(R.string.http_192_168_1_109_8080),token);
+        final ProjectService projectService = todoFactoryService.createProject(getString(R.string.http_192_168_1_109_8080), token);
 
         projectService.delete(project.getId(), new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -416,7 +419,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     }
 
     private void getUserDetail() {
-        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080),token);
+        final AuthenticationService authenticationService = todoFactoryService.createAuthentication(getString(R.string.http_192_168_1_109_8080), token);
 
         authenticationService.getUserDetail(new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -450,7 +453,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     }
 
     private void getSystemSettings() {
-        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080), token);
+        final AuthenticationService authenticationService = todoFactoryService.createAuthentication(getString(R.string.http_192_168_1_109_8080), token);
 
         authenticationService.getSettingDetail(new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -486,7 +489,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         final String selectedFontFamily = fontFamilySpinner.getSelectedItem().toString();
         final String selectedColor = themeSpinner.getSelectedItem().toString();
         final int fontSize = (int) selectTextSize(fontSizeSpinner.getSelectedItem().toString());
-        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080), token);
+        final AuthenticationService authenticationService = todoFactoryService.createAuthentication(getString(R.string.http_192_168_1_109_8080), token);
 
         authenticationService.updateSystemSetting(selectedFontFamily, selectedColor, fontSize, new AuthenticationService.ApiResponseCallBack() {
             @Override
@@ -502,16 +505,22 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
     }
 
     private String fontSizeName(int fontSize) {
-        if (fontSize == (int) getResources().getDimension(R.dimen.small_text_size)) {
+        int smallTextSize = (int) getResources().getDimension(R.dimen.small_text_size);
+        int mediumTextSize = (int) getResources().getDimension(R.dimen.medium_text_size);
+        int largeTextSize = (int) getResources().getDimension(R.dimen.large_text_size);
+
+        if (fontSize == smallTextSize) {
             return "Small";
-        } else if (fontSize == (int) getResources().getDimension(R.dimen.medium_text_size)) {
+        } else if (fontSize == mediumTextSize) {
             return "Medium";
-        } else if (fontSize == (int) getResources().getDimension(R.dimen.large_text_size)) {
+        } else if (fontSize == largeTextSize) {
             return "Large";
         } else {
             return "Default";
         }
     }
+
+
     public void applyFontToAllLayout() {
         FontManager.applyFontToView(this, getWindow().getDecorView().findViewById(android.R.id.content));
     }
@@ -529,7 +538,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
         }
     }
 
-    private void applyTheme(int selectedTheme) {
+    private void applyTheme(final int selectedTheme) {
         final int selectedColor = ContextCompat.getColor(this, selectedTheme);
         final RelativeLayout toolBar = findViewById(R.id.toolbar_view);
         final RelativeLayout sideNavBar = findViewById(R.id.sideNavMenu);
@@ -595,6 +604,7 @@ public class MenuActivity2 extends AppCompatActivity implements MenuView {
             profileIcon.setText(user.setProfileIcon());
         }
     }
+
     /**
      * <p>
      * Navigates to another activity
