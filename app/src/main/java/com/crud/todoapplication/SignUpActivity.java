@@ -18,6 +18,7 @@ import com.crud.todoapplication.api.AuthenticationService;
 import com.crud.todoapplication.model.Credentials;
 import com.crud.todoapplication.model.SignUp;
 import com.crud.todoapplication.model.User;
+import com.crud.todoapplication.serviceFactory.TodoFactoryService;
 import com.google.android.material.snackbar.Snackbar;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -33,6 +34,7 @@ public class SignUpActivity extends AppCompatActivity {
     private boolean isPasswordVisible;
     private Credentials userCredentials;
     private User user;
+    private TodoFactoryService todoFactoryService;
 
     private static Long id = 0L;
 
@@ -55,6 +57,7 @@ public class SignUpActivity extends AppCompatActivity {
         Button signUp = findViewById(R.id.register_button);
         userCredentials = new Credentials();
         user = new User();
+        todoFactoryService = TodoFactoryService.getInstance();
         alreadyAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -90,7 +93,7 @@ public class SignUpActivity extends AppCompatActivity {
                     showSnackBar(String.valueOf(R.string.all_fields_are_required));
                 } else {
                     if (userCredentials.getPassword().equals(userCredentials.getConformPassword())) {
-                        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080));
+                        final AuthenticationService authenticationService = todoFactoryService.createAuthentication(getString(R.string.http_192_168_1_109_8080));
                         final SignUp signUpUser = new SignUp(user, userCredentials);
                         authenticationService.signUp(signUpUser, new AuthenticationService.ApiResponseCallBack() {
                             @Override

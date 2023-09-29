@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.crud.todoapplication.api.AuthenticationService;
 import com.crud.todoapplication.model.Credentials;
 import com.crud.todoapplication.model.User;
+import com.crud.todoapplication.serviceFactory.TodoFactoryService;
 import com.google.android.material.snackbar.Snackbar;
 
 public class FormPageActivity extends AppCompatActivity {
@@ -26,8 +27,7 @@ public class FormPageActivity extends AppCompatActivity {
     private ImageButton cancelButton;
     private User user;
     private String token;
-    private static Long id = 0L;
-    private DatabaseConnection databaseConnection;
+    private TodoFactoryService todoFactoryService;
     private Credentials userCredentials;
 
     @Override
@@ -36,21 +36,15 @@ public class FormPageActivity extends AppCompatActivity {
         int currentTheme = FontManager.getCurrentColour();
         setContentView(R.layout.activity_form_page);
 
-        databaseConnection = new DatabaseConnection(this);
+        todoFactoryService = TodoFactoryService.getInstance();
         backMenuButton = findViewById(R.id.backMenuButton);
         profileIcon = findViewById(R.id.profileIcon);
         user_name = findViewById(R.id.editTextText);
         user_title = findViewById(R.id.editTextText2);
-        //user = databaseConnection.getUserProfile();
+
         token = getIntent().getStringExtra(getString(R.string.token));
         user = new User();
         userCredentials = new Credentials();
-
-//        if (null != user) {
-//            user_name.setText(user.getName());
-//            user_title.setText(user.getTitle());
-//            profileIcon.setText(user.setProfileIcon());
-//        }
 
         backMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,7 +68,7 @@ public class FormPageActivity extends AppCompatActivity {
                         user.setTitle(user_title.getText().toString());
                         profileIcon.setText(user.setProfileIcon());
 
-                        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080), token );
+                        final AuthenticationService authenticationService = todoFactoryService.createAuthentication(getString(R.string.http_192_168_1_109_8080), token );
 
                         authenticationService.UpdateUserDetail(user, new AuthenticationService.ApiResponseCallBack() {
                             @Override

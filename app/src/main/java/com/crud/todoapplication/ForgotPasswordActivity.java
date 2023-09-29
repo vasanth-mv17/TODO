@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.crud.todoapplication.api.AuthenticationService;
+import com.crud.todoapplication.serviceFactory.TodoFactoryService;
 import com.google.android.material.snackbar.Snackbar;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
@@ -28,7 +29,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private ImageView visiblePassword;
     private ImageView visibleConfirmPassword;
     private boolean isPasswordVisibility;
-    private DatabaseConnection databaseConnection;
+    private TodoFactoryService todoFactoryService;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -36,7 +37,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
 
-        databaseConnection = new DatabaseConnection(this);
         resetPassButton = findViewById(R.id.reset_password_button);
         cancel = findViewById(R.id.cancel);
         userEmail = findViewById(R.id.email_for_update);
@@ -46,6 +46,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         visibleConfirmPassword = findViewById(R.id.visible_confirm_password);
         oldHint = findViewById(R.id.email_for_old_hint);
         newHint = findViewById(R.id.email_for_new_hint);
+        todoFactoryService = TodoFactoryService.getInstance();
 
         resetPassButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,7 +64,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     if (!pass.equals(rePass)) {
                         showSnackBar(getString(R.string.password_mismatch));
                     } else {
-                        final AuthenticationService authenticationService = new AuthenticationService(getString(R.string.http_192_168_1_109_8080));
+                        final AuthenticationService authenticationService = todoFactoryService.createAuthentication(getString(R.string.http_192_168_1_109_8080));
                         authenticationService.resetPassword(email, hashPassword, oldHintForPassword, newHintForPassword, new AuthenticationService.ApiResponseCallBack() {
                             @Override
                             public void onSuccess(String response) {

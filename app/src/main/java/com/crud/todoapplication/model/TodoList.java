@@ -17,8 +17,8 @@ public class TodoList {
         filter = new Filter();
     }
 
-    public void add(final TodoItem todoItem) {
-        todoItems.add(todoItem);
+    public boolean add(final TodoItem todoItem) {
+        return todoItems.add(todoItem);
     }
 
     public void remove(final String id) {
@@ -38,31 +38,4 @@ public class TodoList {
     public void setAllItems(List<TodoItem> todoItemList) {
         todoItems.addAll(todoItemList);
     }
-    public List<TodoItem> getAllFilterItems(ProjectTodoItemActivity2.Status status) {
-        List<TodoItem> filteredItems = new ArrayList<>();
-
-        switch (status) {
-            case CHECKED:
-                for (final TodoItem todoItem : todoItems) {
-                    if (todoItem.isChecked()) {
-                        filteredItems.add(todoItem);
-                    }
-                }
-                break;
-            case UNCHECKED:
-                for (final TodoItem todoItem : todoItems) {
-                    if (!todoItem.isChecked()) {
-                        filteredItems.add(todoItem);
-                    }
-                }
-                break;
-            default:
-                filteredItems = new ArrayList<>(todoItems);
-                break;
-        }
-
-        return filteredItems.stream().skip(filter.getSkip()).limit(filter.getLimit()).collect(Collectors.toList());
-    }
-
-
 }

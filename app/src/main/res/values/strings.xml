@@ -94,7 +94,7 @@
     <string name="token">token</string>
     <string name="added_successful">Added successful</string>
     <string name="project_name">Project Name</string>
-    <string name="http_192_168_1_109_8080">http://192.168.43.223:8080/</string>
+    <string name="http_192_168_1_109_8080">http://192.168.1.43:8080/</string>
     <string name="font_family">font_family</string>
     <string name="font_size">font_size</string>
     <string name="color">color</string>

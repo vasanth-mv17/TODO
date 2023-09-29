@@ -13,13 +13,8 @@ public class ProjectList {
         this.projectList = new ArrayList<>();
     }
 
-    public void add(final Project project) {
-        projectList.add(project);
-    }
-
-    public void remove(final Long id) {
-        projectList = projectList.stream().filter(project -> ! Objects.equals(project.getId(), id))
-                .collect(Collectors.toList());
+    public boolean add(final Project project) {
+        return projectList.add(project);
     }
 
     public List<Project> getAllList() {

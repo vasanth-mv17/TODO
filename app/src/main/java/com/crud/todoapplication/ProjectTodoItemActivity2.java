@@ -28,6 +28,7 @@ import com.crud.todoapplication.model.TodoItem;
 import com.crud.todoapplication.model.TodoList;
 import com.crud.todoapplication.model.User;
 import com.crud.todoapplication.service.ProjectView;
+import com.crud.todoapplication.serviceFactory.TodoFactoryService;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
@@ -67,7 +68,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     private String selectedProjectName;
     private String selectedProjectId;
     private TodoList todoList;
-    private DatabaseConnection databaseConnection;
+
     private com.crud.todoapplication.model.Filter filter;
     private ProjectListController projectListController;
     private List<TodoItem> todoItems;
@@ -76,6 +77,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     private int currentPage = 1;
     private int pageCapacity;
     private String token;
+    private TodoFactoryService todoFactoryService;
 
     /**
      * <p>
@@ -112,13 +114,14 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         selectedProjectName = getIntent().getStringExtra(getString(R.string.ProjectName));
         token = getIntent().getStringExtra(getString(R.string.token));
         todoList = new TodoList();
-        databaseConnection = new DatabaseConnection(this);
+        todoFactoryService = TodoFactoryService.getInstance();
+
         filter = new com.crud.todoapplication.model.Filter();
         todoItems = todoList.getAllItems();
         pageCapacity = Integer.parseInt(filterSpinnerPage.getSelectedItem().toString());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new TodoItemAdapter(todoItems, ProjectTodoItemActivity2.this, databaseConnection, todoList);
+        adapter = new TodoItemAdapter(todoItems, ProjectTodoItemActivity2.this, todoList);
         androidx.recyclerview.widget.ItemTouchHelper.Callback callback = new ItemMoveHelper(adapter);
         androidx.recyclerview.widget.ItemTouchHelper itemTouchHelper = new androidx.recyclerview.widget.ItemTouchHelper(callback);
         loadTodoItemsFromDatabase();
@@ -173,7 +176,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
 
             @SuppressLint("NotifyDataSetChanged")
             @Override
-            public void onCloseIconClick(TodoItem todoItem) {
+            public void onCloseIconClick(final TodoItem todoItem) {
                 removeTodoItem(todoItem);
                 todoList.remove(todoItem.getId());
                 todoItems.remove(todoItem);
@@ -188,7 +191,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             }
 
             @Override
-            public void onItemUpdate(TodoItem fromItem, TodoItem toItem) {
+            public void onItemUpdate(final TodoItem fromItem, final TodoItem toItem) {
                 updateItemOrder(fromItem, toItem);
             }
         });
@@ -226,7 +229,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
                 switch (selectedStatus) {
                     case ALL:
                         todoItems = todoList.getAllItems(selectedProjectId);
-                        List<TodoItem> allItem = new ArrayList<>();
+                        final List<TodoItem> allItem = new ArrayList<>();
 
                         for (final TodoItem todoItem : todoItems) {
                             allItem.add(todoItem);
@@ -276,7 +279,6 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             public void onNothingSelected(final AdapterView<?> adapterView) {
             }
         });
-
     }
 
     private void setupPreviousPageButton() {
@@ -342,28 +344,28 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         });
     }
 
-    private void updateItemState(TodoItem todoItem) {
-        final TodoItemService itemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
+    private void updateItemState(final TodoItem todoItem) {
+        final TodoItemService itemService = todoFactoryService.createTodoItem(getString(R.string.http_192_168_1_109_8080), token);
 
         itemService.updateState(todoItem, new AuthenticationService.ApiResponseCallBack() {
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(final String response) {
                 showSnackBar(response);
             }
 
             @Override
-            public void onFailure(String response) {
+            public void onFailure(final String response) {
                 showSnackBar(response);
             }
         });
     }
 
-    private void updateItemOrder(TodoItem fromItem, TodoItem toItem) {
-        final TodoItemService itemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
+    private void updateItemOrder(final TodoItem fromItem, final TodoItem toItem) {
+        final TodoItemService itemService = todoFactoryService.createTodoItem(getString(R.string.http_192_168_1_109_8080), token);
 
         itemService.update(fromItem, new AuthenticationService.ApiResponseCallBack() {
             @Override
-            public void onSuccess(final String responseBody) {}
+            public void onSuccess(final String responseBody) { showSnackBar(responseBody);}
 
             @Override
             public void onFailure(final String errorMessage) {
@@ -372,28 +374,28 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
         });
         itemService.update(toItem, new AuthenticationService.ApiResponseCallBack() {
             @Override
-            public void onSuccess(String responseBody) {
+            public void onSuccess(final String responseBody) {
                 showSnackBar(responseBody);
             }
 
             @Override
-            public void onFailure(String errorMessage) {
+            public void onFailure(final String errorMessage) {
                 showSnackBar(errorMessage);
             }
         });
     }
 
     private void removeTodoItem(final TodoItem todoItem) {
-        final TodoItemService itemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
+        final TodoItemService itemService = todoFactoryService.createTodoItem(getString(R.string.http_192_168_1_109_8080), token);
 
         itemService.delete(todoItem.getId(), new AuthenticationService.ApiResponseCallBack() {
             @Override
-            public void onSuccess(String responseBody) {
+            public void onSuccess(final String responseBody) {
                 showSnackBar(getString(R.string.removed));
             }
 
             @Override
-            public void onFailure(String errorMessage) {
+            public void onFailure(final String errorMessage) {
                 showSnackBar(errorMessage);
             }
         });
@@ -432,11 +434,11 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     }
 
     private void loadTodoItemsFromDatabase() {
-        final TodoItemService todoItemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
+        final TodoItemService todoItemService = todoFactoryService.createTodoItem(getString(R.string.http_192_168_1_109_8080), token);
 
         todoItemService.getAllItem(new AuthenticationService.ApiResponseCallBack() {
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(final String response) {
                 todoItems = parseItemFromResponse(response);
 
                 if (!todoItems.isEmpty()) {
@@ -451,14 +453,14 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             }
 
             @Override
-            public void onFailure(String response) {
+            public void onFailure(final String response) {
                 showSnackBar(response);
             }
         });
     }
 
-    private List<TodoItem> parseItemFromResponse(String response) {
-        List<TodoItem> parsedProjects = new ArrayList<>();
+    private List<TodoItem> parseItemFromResponse(final String response) {
+        final List<TodoItem> parsedProjects = new ArrayList<>();
 
         try {
             final JSONObject responseJson = new JSONObject(response);
@@ -466,8 +468,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
 
 
             for (int i = 0; i < data.length(); i++) {
-                JSONObject projectObject = data.getJSONObject(i);
-
+                final JSONObject projectObject = data.getJSONObject(i);
 
                 if (null != selectedProjectId && selectedProjectId.equals(projectObject.getString(getString(R.string.project_id)))) {
                     final TodoItem todoItem = new TodoItem();
@@ -502,7 +503,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      */
     private void displayCheckedItems() {
         todoItems = todoList.getAllItems(selectedProjectId);
-        List<TodoItem> checkedItems = new ArrayList<>();
+        final List<TodoItem> checkedItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
             if (todoItem.getStatus() == TodoItem.Status.CHECKED) {
@@ -524,7 +525,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      */
     private void displayUncheckedItems() {
         todoItems = todoList.getAllItems(selectedProjectId);
-        List<TodoItem> unCheckedItems = new ArrayList<>();
+        final List<TodoItem> unCheckedItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
             if (todoItem.getStatus() == TodoItem.Status.UNCHECKED) {
@@ -548,7 +549,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
     public void filterAndDisplayItems(final String query) {
         filter.setSearchAttribute(query);
         todoItems = todoList.getAllItems(selectedProjectId);
-        List<TodoItem> searchAllItems = new ArrayList<>();
+        final List<TodoItem> searchAllItems = new ArrayList<>();
 
         for (final TodoItem todoItem : todoItems) {
             if (todoItem.getName().toLowerCase().contains(filter.getSearchAttribute().toLowerCase())) {
@@ -567,46 +568,99 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
      * Stores the items into table layout
      * </p>
      */
-    @SuppressLint("NotifyDataSetChanged")
-    public void addNewTodoItem() {
-        final String todoLabel = editText.getText().toString();
-        if (!todoLabel.isEmpty()) {
-            final TodoItem todoItem = new TodoItem();
-            final long itemOrder = adapter.getItemCount() + 1;
-            final TodoItemService todoItemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
-
-            todoItem.setName(todoLabel);
-            todoItem.setParentId(selectedProjectId);
-            todoItem.setStatus(TodoItem.Status.UNCHECKED);
-            todoItem.setOrder(itemOrder);
-            todoList.add(todoItem);
-
-            todoItemService.create(todoItem.getName(), selectedProjectId, new AuthenticationService.ApiResponseCallBack() {
-                @Override
-                public void onSuccess(String response) {
-                    showSnackBar(getString(R.string.added_successful));
-
-                    todoItems = todoList.getAllItems(selectedProjectId);
-
-                    pageNumber.setVisibility(View.VISIBLE);
-                    previousPageButton.setVisibility(View.VISIBLE);
-                    nextPageButton.setVisibility(View.VISIBLE);
-//                    adapter.addProjects(todoItems);
+//    @SuppressLint("NotifyDataSetChanged")
+//    public void addNewTodoItem() {
+//        final String todoLabel = editText.getText().toString();
+//        if (!todoLabel.isEmpty()) {
+//            final TodoItem todoItem = new TodoItem();
+//            final long itemOrder = adapter.getItemCount() + 1;
+//            final TodoItemService todoItemService = new TodoItemService(getString(R.string.http_192_168_1_109_8080), token);
+//
+//            todoItem.setName(todoLabel);
+//            todoItem.setParentId(selectedProjectId);
+//            todoItem.setStatus(TodoItem.Status.UNCHECKED);
+//            todoItem.setOrder(itemOrder);
+//            todoList.add(todoItem);
+//
+//            todoItemService.create(todoItem.getName(), selectedProjectId, new AuthenticationService.ApiResponseCallBack() {
+//                @Override
+//                public void onSuccess(final String response) {
+//                    showSnackBar(getString(R.string.added_successful));
+//
+//                    todoItems = todoList.getAllItems(selectedProjectId);
+//
+//                    pageNumber.setVisibility(View.VISIBLE);
+//                    previousPageButton.setVisibility(View.VISIBLE);
+//                    nextPageButton.setVisibility(View.VISIBLE);
+////                    adapter.addProjects(todoItems);
+////                    loadTodoItemsFromDatabase();
+//                    adapter.updateTodoItems(todoItems);
 //                    loadTodoItemsFromDatabase();
-                    adapter.updateTodoItems(todoItems);
-                    loadTodoItemsFromDatabase();
-                }
+//                }
+//
+//                @Override
+//                public void onFailure(final String response) {
+//                    showSnackBar(response);
+//                }
+//            });
+//
+//            editText.getText().clear();
+//            updateRecyclerView();
+//            updatePageNumber(pageNumber);
+//        }
+//    }
+    public void addNewTodoItem() {
+        final String todoLabel = editText.getText().toString().trim();
 
-                @Override
-                public void onFailure(String response) {
-                    showSnackBar(response);
-                }
-            });
+        if (!todoLabel.isEmpty()) {
+            final long itemOrder = adapter.getItemCount() + 1;
+            final TodoItem todoItem = createTodoItem(todoLabel, selectedProjectId, itemOrder);
+
+            createTodoItemAsync(todoItem);
 
             editText.getText().clear();
             updateRecyclerView();
             updatePageNumber(pageNumber);
         }
+
+
+    }
+
+    private TodoItem createTodoItem(String name, String parentId, long order) {
+        TodoItem todoItem = new TodoItem();
+        todoItem.setName(name);
+        todoItem.setParentId(parentId);
+        todoItem.setStatus(TodoItem.Status.UNCHECKED);
+        todoItem.setOrder(order);
+        todoList.add(todoItem);
+        return todoItem;
+    }
+
+    private void createTodoItemAsync(final TodoItem todoItem) {
+        final TodoItemService todoItemService = todoFactoryService.createTodoItem(getString(R.string.http_192_168_1_109_8080), token);
+
+        todoItemService.create(todoItem.getName(), selectedProjectId, new AuthenticationService.ApiResponseCallBack() {
+            @Override
+            public void onSuccess(final String response) {
+                showSnackBar(getString(R.string.added_successful));
+                loadAndUpdateTodoItems();
+            }
+
+            @Override
+            public void onFailure(final String response) {
+                showSnackBar(response);
+            }
+        });
+    }
+
+    private void loadAndUpdateTodoItems() {
+        todoItems = todoList.getAllItems(selectedProjectId);
+
+        pageNumber.setVisibility(View.VISIBLE);
+        previousPageButton.setVisibility(View.VISIBLE);
+        nextPageButton.setVisibility(View.VISIBLE);
+        adapter.updateTodoItems(todoItems);
+        loadTodoItemsFromDatabase();
     }
 
     /**
@@ -623,7 +677,7 @@ public class ProjectTodoItemActivity2 extends AppCompatActivity implements Proje
             startIndex = 0;
         }
 
-        List<TodoItem> pageItems = todoItems.subList(startIndex, endIndex);
+        final List<TodoItem> pageItems = todoItems.subList(startIndex, endIndex);
         adapter.updateTodoItems(pageItems);
     }
 
