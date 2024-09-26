@@ -26,7 +26,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TODO Application"
+                android:text="@string/TodoApplication"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:layout_centerVertical="true"
@@ -63,7 +63,7 @@
                 android:id="@+id/sideNavTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TODO Lists"
+                android:text="@string/todo_lists"
                 android:textSize="18sp"
                 android:textColor="@android:color/white"
                 android:layout_centerVertical="true"
@@ -85,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
                 android:id="@+id/addList"
-                android:text="Add List"
+                android:text="@string/addList"
                 android:textSize="20sp"
                 android:drawableLeft="@drawable/add_circle"
                 android:drawablePadding="8dp"/>
@@ -95,24 +95,10 @@
             android:id="@+id/nameListView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:divider="@android:color/holo_red_dark"
+            android:divider="@android:color/darker_gray"
             android:dividerHeight="1dp">
 
         </ListView>
-        <!--        <ScrollView-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="0dp"-->
-        <!--            android:layout_weight="1"-->
-        <!--            android:layout_marginTop="16dp">-->
-
-        <!--            <TableLayout-->
-        <!--                android:id="@+id/tableLayout"-->
-        <!--                android:layout_width="match_parent"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:stretchColumns="*">-->
-        <!--            </TableLayout>-->
-
-        <!--        </ScrollView>-->
 
     </LinearLayout>
 
